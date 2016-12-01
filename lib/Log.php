@@ -1,7 +1,7 @@
 <?php
 class Log{
     private $config,$mainIndex,$logFormat,$fieldPos;
-    private $select,$from,$where;
+    private $select,$sum,$count,$from,$where;
     private $stime,$etime,$period;
 
     public function makeIndex($config){
@@ -94,6 +94,14 @@ class Log{
         file_put_contents($fileName, json_encode($mainIndex));
         return $mainIndex;
     }
+    
+    public function sum($sum){
+        $this->sum = $sum;
+    }
+    
+    public function count($count){
+        $this->count = $count;
+    }
 
     public function select($select){
         if(!is_array($select)){
@@ -117,25 +125,17 @@ class Log{
                     break;
             }
         }
+        
+        if(!$this->etime){
+            $this->etime = time();
+        }
+        if(!$this->stime){
+            $this->stime = $this->etime - 3600;
+        }
         $this->where = $where;
     }
 
-    private function prepareQuery(){
-        if(!$this->select){
-            throw new Exception;
-        }
-        $now = time();
-        if(!$this->stime){
-            $this->stime = $now - 24*3600;
-        }
-        if(!$this->etime){
-            $this->etime = $now;
-        }
-    }
-
-    private function getLogFiles(){
-        $stime = $this->stime;
-        $etime = $this->etime;
+    private function getLogFiles($stime,$etime){
         $logFiles = [];
         foreach($this->mainIndex as $file=>$timeArr){
             if($etime >= $timeArr['stime']){
@@ -147,30 +147,51 @@ class Log{
         }
         return array_unique($logFiles);
     }
+    
+    private function buildFields($log){
+        $fields = [];
+        preg_match($this->logFormat, $log, $match);
+        if(!$match){
+            return $fields;
+        }
+        $fieldPos = $this->fieldPos;
+        foreach($fieldPos as $name=>$pos){
+            $field = $match[$pos+1];
+            if($name==$this->config['http_query']){
+                parse_str($field,$field);
+            }
+            $fields[$name] = $field;
+        }
+        return $fields;
+    }
 
     private function filterWhere($match){
         $where = $this->where;
-        $fieldPos = $this->fieldPos;
         foreach($where as $field=>$value){
-            $pos = $fieldPos[$field] + 1;
-            if($match[$pos] != $value){
+            if($match[$field] != $value){
                 return false;
             }
         }
         return true;
     }
 
+    /*
+     * $period 小时
+     */
     public function period($period){
-        $this->period = $period;
+        $this->period = $period*3600;
     }
 
     public function get(){
-        $this->prepareQuery();
-        $logFiles = $this->getLogFiles();
+        $logFiles = $this->getLogFiles($this->stime,$this->etime);
         $table = $this->table;
         $fieldPos = $this->fieldPos;
+        $period = $this->period;
         $rows = [];
         $limit = 200;
+        $_count = 0;
+        $_sum = 0;
+        $_time = 0;
         foreach($logFiles as $file){
             if(!is_file($file)){
                 continue;
@@ -182,15 +203,39 @@ class Log{
             foreach($posArr as $pos){
                 fseek($logFp,$pos);
                 $log = fgets($logFp);
-                preg_match($this->logFormat, $log, $match);
-                if(!$this->filterWhere($match)){
+                $fields = $this->buildFields($log);
+                $time = $fields[$this->config['time']];
+                if(!is_numeric($time)){
+                    $time = strtotime($time);
+                }
+                if(!$this->filterWhere($fields)){
                     continue;
                 }
                 $row = [];
+                //select
                 foreach($this->select as $select){
                     $pos = $fieldPos[$field] + 1;
                     $row[$select] = $match[$pos];
                 }
+                //count
+                if($this->count){
+                    $_count++;
+                }
+                //sum
+                if($this->sum){
+                    $_sum += $fields[$this->sum];
+                }
+                //period
+                if($this->period){
+                    $_time == 0 && $_time = $time;
+                    if($time - $_time < $this->period){
+                        continue;
+                    }
+                    $_count = 0;
+                    $_sum = 0;
+                    $_time = $time;
+                }
+                
                 $rows[] = $row;
             }
             fclose($logFp);
