@@ -1,0 +1,5 @@
+{
+    "require": {
+        "hisune/echarts-php": "~1.0.6"
+    }
+}
