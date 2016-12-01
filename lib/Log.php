@@ -4,6 +4,13 @@ class Log{
     private $select,$sum,$count,$from,$where;
     private $stime,$etime,$period;
 
+    public function __construct(){
+        $this->etime = time();
+        $this->stime = $this->etime - 3600;
+        $this->period = 1;
+        $this->where = [];
+    }
+
     public function makeIndex($config){
         $this->config = $config;
         $logFormat = str_replace(array_keys($config['formatReg']),array_values($config['formatReg']),$config['logFormat']);
@@ -54,6 +61,7 @@ class Log{
         $index = [];
         $fp = fopen($file,'r');
         while(!feof($fp)){
+            $pos = ftell($fp);
             $line = fgets($fp);
             if(empty($line)){
                 continue;
@@ -68,7 +76,7 @@ class Log{
             if(!array_key_exists($table, $index)){
                 $index[$table] = [];
             }
-            $index[$table][] = ftell($fp);
+            $index[$table][] = $pos;
         }
         fclose($fp);
         file_put_contents($file.'.index', json_encode($index));
@@ -94,45 +102,13 @@ class Log{
         file_put_contents($fileName, json_encode($mainIndex));
         return $mainIndex;
     }
-    
-    public function sum($sum){
-        $this->sum = $sum;
-    }
-    
-    public function count($count){
-        $this->count = $count;
-    }
 
-    public function select($select){
-        if(!is_array($select)){
-            $select = [$select];
+    public function __set($name,$val){
+        //$period 小时
+        if($name == 'period'){
+            $val *= 3600;
         }
-        $this->select = $select;
-    }
-
-    public function table($table){
-        $this->table = $table;
-    }
-
-    public function where(array $where){
-        foreach($where as $k=>$v){
-            switch($k){
-                case 'stime':
-                    $this->stime = $v;
-                    break;
-                case 'etime':
-                    $this->etime = $v;
-                    break;
-            }
-        }
-        
-        if(!$this->etime){
-            $this->etime = time();
-        }
-        if(!$this->stime){
-            $this->stime = $this->etime - 3600;
-        }
-        $this->where = $where;
+        $this->$name = $val;
     }
 
     private function getLogFiles($stime,$etime){
@@ -175,23 +151,16 @@ class Log{
         return true;
     }
 
-    /*
-     * $period 小时
-     */
-    public function period($period){
-        $this->period = $period*3600;
-    }
-
     public function get(){
         $logFiles = $this->getLogFiles($this->stime,$this->etime);
         $table = $this->table;
         $fieldPos = $this->fieldPos;
         $period = $this->period;
-        $rows = [];
         $limit = 200;
-        $_count = 0;
-        $_sum = 0;
+        $res = 0;
         $_time = 0;
+        $xData = [];
+        $yData = [];
         foreach($logFiles as $file){
             if(!is_file($file)){
                 continue;
@@ -211,36 +180,29 @@ class Log{
                 if(!$this->filterWhere($fields)){
                     continue;
                 }
-                $row = [];
-                //select
-                foreach($this->select as $select){
-                    $pos = $fieldPos[$field] + 1;
-                    $row[$select] = $match[$pos];
-                }
+
                 //count
                 if($this->count){
-                    $_count++;
+                    $res++;
                 }
+
                 //sum
-                if($this->sum){
-                    $_sum += $fields[$this->sum];
+                elseif($this->sum){
+                    $res += $fields[$this->sum];
                 }
+
                 //period
-                if($this->period){
-                    $_time == 0 && $_time = $time;
-                    if($time - $_time < $this->period){
-                        continue;
-                    }
-                    $_count = 0;
-                    $_sum = 0;
+                $_time == 0 && $_time = $time;
+                if($this->period && ($time - $_time >= $this->period)){
+                    $res = 0;
                     $_time = $time;
+                    $xData[] = data('Y-m-d H:i:s',$time);
+                    $yData[] = $res;
                 }
-                
-                $rows[] = $row;
             }
             fclose($logFp);
         }
 
-        return $rows;
+        return compact('xData','yData');
     }
 }

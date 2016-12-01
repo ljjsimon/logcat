@@ -20,6 +20,6 @@ $sysConfig = [
         "%http_code" => "(\w{3})",
         "%http_version" => "(http.+)"
     ],
-    "rootPath": dirname(__FILE__).'/../'
+    "rootPath" => dirname(__FILE__).'/../'
 ];
 
