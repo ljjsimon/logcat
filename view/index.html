@@ -3,14 +3,26 @@
 <head>
 <meta charset="utf-8">
 <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="view/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
 <script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="view/js/echarts.min.js"></script>
 <script src="view/js/vue.min.js"></script>
+<script type="text/javascript" src="view/js/datetimepicker/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+<script type="text/javascript" src="view/js/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
 </head>
 <body>
 <form id="form" class="form-inline">
-    <div class="form-group" v-for="(name,item) in inputs">
-        <label>{{item.label}}</label><input name="{{name}}" v-model="item.value">
+    <div class="form-group">
+        <label>sum</label><input name="sum" v-model="sum">
+    </div>
+    <div class="form-group">
+        <label>count</label><input name="count" v-model="count">
+    </div>
+    <div class="form-group">
+        <label>stime</label><input id="stime" name="stime" v-model="stime">
+    </div>
+    <div class="form-group">
+        <label>etime</label><input id="etime" name="etime" v-model="etime">
     </div>
     <div class="form-group" v-for="(index,v) in where_if">
         <label>条件</label><input name="where_f[]" v-model="where_f[index]">
@@ -22,29 +34,23 @@
 </form>
 <div id="chart"></div>
 <script>
+$('#stime').datetimepicker({
+    language:  'zh-CN',
+    format: 'yyyy-mm-dd hh:ii:ss'
+});
+$('#etime').datetimepicker({
+    language:  'zh-CN',
+    format: 'yyyy-mm-dd hh:ii:ss'
+});
 var chart = echarts.init(document.getElementById('chart'))
 
 new Vue({
     el:"#form",
     data:{
-        inputs:{
-            sum: {
-                label: "加和（sum）",
-                value: ""
-            },
-            count: {
-                label: "加和（sum）",
-                value: ""
-            },
-            stime: {
-                label: "开始时间",
-                value: ""
-            },
-            etime: {
-                label: "结束时间",
-                value: ""
-            }
-        },
+        sum: "",
+        count: "",
+        stime: "",
+        etime: ""
         where_f: [],
         where_v: [],
         config: {
