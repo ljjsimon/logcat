@@ -1,15 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
+<link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="view/js/echarts.min.js"></script>
+<script src="view/js/vue.min.js"></script>
 </head>
 <body>
-<form>
-    <label>加和（sum）</label><input name="sum">
-    <label>计数（count）</label><input name="count">
-    <label>开始时间</label><input name="where[stime]">
-    <label>结束时间</label><input name="where[etime]">
-    <label>条件</label><input name="where[]">
-    <button type="submit">提交</button>
+<form id="form" class="form-inline">
+    <div class="form-group" v-for="(name,item) in inputs">
+        <label>{{item.label}}</label><input name="{{name}}" v-model="item.value">
+    </div>
+    <div class="form-group" v-for="(index,v) in where_if">
+        <label>条件</label><input name="where_f[]" v-model="where_f[index]">
+        <label>值</label><input name="where_v[]" v-model="where_v[index]">
+        <button type="button" v-on:click="delWhere(index)">x</button>
+    </div>
+    <button type="button" v-on:click="addWhere">添加条件</button>
+    <button type="button" v-on:click="submit">提交</button>
 </form>
+<div id="chart"></div>
+<script>
+var chart = echarts.init(document.getElementById('chart'))
+
+new Vue({
+    el:"#form",
+    data:{
+        inputs:{
+            sum: {
+                label: "加和（sum）",
+                value: ""
+            },
+            count: {
+                label: "加和（sum）",
+                value: ""
+            },
+            stime: {
+                label: "开始时间",
+                value: ""
+            },
+            etime: {
+                label: "结束时间",
+                value: ""
+            }
+        },
+        where_f: [],
+        where_v: [],
+        config: {
+            logFormatAs: []
+        },
+        chartOption: {
+            title: "",
+            tooltip: {},
+            legend: {
+                data: []
+            },
+            xAxis: {
+                data: []
+            },
+            yAxis: {},
+            series: []
+        }
+    },
+    beforeCreate: ()=>{
+        this.request({
+            url: '/?getConfig=1',
+            complete: (data)=>{
+                this.config = data
+            }
+        })
+    },
+    methods: ()=>{
+        request: (option)=>{
+            if(typeof option.url == 'undefined'){
+                return false;
+            }
+            let xhr = new XMLHttpRequest();
+            xhr.open(typeof option.method == 'undefined' ? 'GET' : option.method, option.url)
+            if(typeof option.complete != 'undefined'){
+                xhr.onreadystatechange = option.complete
+            }
+            if(typeof option.data != 'undefined'){
+                xhr.send(option.data)
+            }else{
+                xhr.send()
+            }
+        },
+        submit: ()=>{
+            this.request({
+                url: '/'
+            })
+        },
+        render: ()=>{
+            chart.setOption(this.chartOption)
+        },
+        addWhere: ()=>{
+            this.where_f.push('')
+            this.where_v.push('')
+        },
+        delWhere: (index)=>{
+            this.where_f.splice(index,1)
+            this.where_v.splice(index,1)
+        }
+    }
+})
+</script>
 </body>
 </html>

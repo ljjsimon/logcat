@@ -39,7 +39,9 @@ if(isset($_GET['etime'])){
     $log->etime = $_GET['etime'];
 }
 
-if($_GET){
+if(isset($_GET['getGonfig'])){
+    echo json_encode($config);
+}elseif($_GET){
     $data = $log->get();
     echo json_encode($data);
 }else{
