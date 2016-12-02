@@ -52,11 +52,11 @@ class Log{
             closedir($dh);
         }
         closedir($_dh);
-        $this->mainIndex = $this->_makeMainIndex($mainIndex);
+        $this->mainIndex = $this->_makeMainIndex($this->config['rootPath'].$this->config['dataDir'].'/main.index',$mainIndex);
     }
 
     /*
-     * make index for every file by table
+     * make index for files by table
      */
     private function _makeIndex($file,$logFormat,$tablePos,$timePos){
         $stime = 0;
@@ -94,31 +94,39 @@ class Log{
     /*
      * make index for files by time
      */
-    private function _makeMainIndex(array $index){
+    private function _makeMainIndex($fileName,array $index){
         $mainIndex = [];
-        $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
+        
         if(file_exists($fileName)){
-            $mainIndex = json_decode(file_get_contents($fileName));
+            $mainIndex = json_decode(file_get_contents($fileName),true);
             foreach($mainIndex as $file=>$arr){
                 if(!file_exists($file)){
                     unset($mainIndex[$file]);
                 }
             }
         }
-        if(empty($index)){
-            return;
+        
+        if(!empty($index)){
+            $mainIndex = array_merge($mainIndex,$index);
+            file_put_contents($fileName, json_encode($mainIndex));
         }
-        $mainIndex = array_merge($mainIndex,$index);
-        $this->mainIndex = $mainIndex;
-        file_put_contents($fileName, json_encode($mainIndex));
         return $mainIndex;
     }
 
     public function __set($name,$val){
-        //$period 小时
-        if($name == 'period'){
-            $val *= 3600;
+        switch($name){
+            case 'period':
+                //$period 小时
+                $val *= 3600;
+                break;
+            case 'stime':
+            case 'etime':
+                if(!is_numeric($val)){
+                    $val = strtotime($val);
+                }
+                break;
         }
+        
         $this->$name = $val;
     }
 
@@ -126,10 +134,10 @@ class Log{
         $logFiles = [];
         foreach($this->mainIndex as $file=>$timeArr){
             if($etime >= $timeArr['stime']){
-                $indexFile[] = $file;
+                $logFiles[] = $file;
             }
             if($stime <= $timeArr['etime']){
-                $indexFile[] = $file;
+                $logFiles[] = $file;
             }
         }
         return array_unique($logFiles);
@@ -198,6 +206,9 @@ class Log{
                 if(!is_numeric($time)){
                     $time = strtotime($time);
                 }
+                if($time > $this->etime || $time < $this->stime){
+                    continue;
+                }
                 if(!$this->filterWhere($fields)){
                     continue;
                 }
@@ -217,11 +228,16 @@ class Log{
                 if($this->period && ($time - $_time >= $this->period)){
                     $res = 0;
                     $_time = $time;
-                    $xData[] = data('Y-m-d H:i:s',$time);
+                    $xData[] = date('Y-m-d H:i:s',$time);
                     $yData[] = $res;
                 }
             }
             fclose($logFp);
+        }
+        
+        if($res){
+            $xData[] = date('Y-m-d H:i:s',$time);
+            $yData[] = $res;
         }
 
         return compact('xData','yData');
