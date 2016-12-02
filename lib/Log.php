@@ -19,8 +19,8 @@ class Log{
         $fieldPos = $config['logFormatAs'];
         $fieldPos = array_flip($fieldPos);
         $this->fieldPos = $fieldPos;
-        $tablePos = $fieldPos['table'];
-        $timePos = $fieldPos['time'];
+        $tablePos = $fieldPos[$config['table']];
+        $timePos = $fieldPos[$config['time']];
         $mainIndex = [];
         //一级目录
         $dir = $config['rootPath'].$config['dataDir'];
@@ -55,6 +55,9 @@ class Log{
         $this->mainIndex = $this->_makeMainIndex($mainIndex);
     }
 
+    /*
+     * make index for every file by table
+     */
     private function _makeIndex($file,$logFormat,$tablePos,$timePos){
         $stime = 0;
         $etime = 0;
@@ -88,17 +91,25 @@ class Log{
         ];
     }
 
+    /*
+     * make index for files by time
+     */
     private function _makeMainIndex(array $index){
         $mainIndex = [];
         $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
         if(file_exists($fileName)){
             $mainIndex = json_decode(file_get_contents($fileName));
+            foreach($mainIndex as $file=>$arr){
+                if(!file_exists($file)){
+                    unset($mainIndex[$file]);
+                }
+            }
         }
-        $this->mainIndex = $mainIndex;
         if(empty($index)){
             return;
         }
         $mainIndex = array_merge($mainIndex,$index);
+        $this->mainIndex = $mainIndex;
         file_put_contents($fileName, json_encode($mainIndex));
         return $mainIndex;
     }
@@ -150,6 +161,16 @@ class Log{
         }
         return true;
     }
+    
+    private function getPos(array $index,$table){
+        $pos = [];
+        foreach($index as $_table=>$_pos){
+            if(strpos($table,$_table)===0){
+                $pos = array_merge($pos,$_pos);
+            }
+        }
+        return $pos;
+    }
 
     public function get(){
         $logFiles = $this->getLogFiles($this->stime,$this->etime);
@@ -167,7 +188,7 @@ class Log{
             }
             
             $index = json_decode(file_get_contents($file.'.index'),true);
-            $posArr = $index[$table];
+            $posArr = $this->getPos($index,$table);
             $logFp = fopen($file,'r');
             foreach($posArr as $pos){
                 fseek($logFp,$pos);

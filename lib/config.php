@@ -1,4 +1,4 @@
-<?
+<?php
 $sysConfig = [
     "formatReg" => [
         "\\" => "\\\\",
@@ -22,4 +22,3 @@ $sysConfig = [
     ],
     "rootPath" => dirname(__FILE__).'/../'
 ];
-

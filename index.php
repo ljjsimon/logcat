@@ -1,6 +1,6 @@
 <?php
 include "lib/Log.php";
-include "lib/config.php";
+require "lib/config.php";
 
 $config = json_decode(file_get_contents('./config.json'),true);
 
