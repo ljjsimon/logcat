@@ -1,6 +1,8 @@
 <?php
 include "lib/Log.php";
 require "lib/config.php";
+ini_set('memory_limit', '256M');
+date_default_timezone_set('ASIA/Shanghai');
 
 $config = json_decode(file_get_contents('./config.json'),true);
 
@@ -39,7 +41,7 @@ if(isset($_GET['etime'])){
     $log->etime = $_GET['etime'];
 }
 
-if(isset($_GET['getGonfig'])){
+if(isset($_GET['getConfig'])){
     echo json_encode($config);
 }elseif($_GET){
     $data = $log->get();

@@ -1,6 +1,5 @@
 {
     "require": {
-        "hisune/echarts-php": "~1.0.6",
         "twbs/bootstrap": "^3.3"
     }
 }

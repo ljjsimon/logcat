@@ -1,11 +1,11 @@
 {
   "dataDir": "data",
-  "logFormat": "%ip, %ip %string %ip - [%string] \"%http_method %http_path%http_query %http_version\" %http_code %number \"-\" %float %number \"%string\"",
+  "logFormat": "%ip,? ?%ip? %string %ip - [%string] \"%http_method %http_path%http_query %http_version\" %http_code %number \"%string\" %float %number \"%string\"",
   "logFormatAs": [
     "client_ip",
-    "server_ip",
+    "x_forward_ip",
     "domain",
-    "local_ip",
+    "server_ip",
     "time",
     "method",
     "path",
@@ -13,6 +13,7 @@
     "http_version",
     "http_code",
     "t1",
+    "s1",
     "response_time",
     "t2",
     "ua"

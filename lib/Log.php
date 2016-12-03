@@ -1,15 +1,8 @@
 <?php
 class Log{
-    private $config,$mainIndex,$logFormat,$fieldPos;
-    private $select,$sum,$count,$from,$where;
+    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog=[];
+    private $select,$sum,$count,$table,$where;
     private $stime,$etime,$period;
-
-    public function __construct(){
-        $this->etime = time();
-        $this->stime = $this->etime - 3600;
-        $this->period = 1;
-        $this->where = [];
-    }
 
     public function makeIndex($config){
         $this->config = $config;
@@ -53,6 +46,14 @@ class Log{
         }
         closedir($_dh);
         $this->mainIndex = $this->_makeMainIndex($this->config['rootPath'].$this->config['dataDir'].'/main.index',$mainIndex);
+        $this->writeErrorLog();
+    }
+
+    private function writeErrorLog(){
+        if(empty($this->errorLog)){
+            return;
+        }
+        file_put_contents($this->config['dataDir'].'/error.log', $this->errorLog, FILE_APPEND);
     }
 
     /*
@@ -63,13 +64,19 @@ class Log{
         $etime = 0;
         $index = [];
         $fp = fopen($file,'r');
+        $l=0;
         while(!feof($fp)){
+            $l++;
             $pos = ftell($fp);
             $line = fgets($fp);
             if(empty($line)){
                 continue;
             }
             preg_match($logFormat, $line, $match);
+            if(empty($match)){
+                $this->errorLog .= "$file, line $l\n";
+                continue;
+            }
             $table = $match[$tablePos+1];
             $etime = $match[$timePos+1];
             if(!$stime){
@@ -114,6 +121,9 @@ class Log{
     }
 
     public function __set($name,$val){
+        if($val === ''){
+            return;
+        }
         switch($name){
             case 'period':
                 //$period 小时
@@ -173,14 +183,23 @@ class Log{
     private function getPos(array $index,$table){
         $pos = [];
         foreach($index as $_table=>$_pos){
-            if(strpos($table,$_table)===0){
+            if($table == '*' || strpos($_table,$table)!==false){
                 $pos = array_merge($pos,$_pos);
             }
         }
         return $pos;
     }
 
+    private function prepareQuery(){
+        !$this->etime && $this->etime = time();
+        !$this->stime && $this->stime = $this->etime - 3600;
+        !$this->period && $this->period = 1;
+        !$this->where && $this->where = [];
+        !$this->table && $this->table = '*';
+    }
+
     public function get(){
+        $this->prepareQuery();
         $logFiles = $this->getLogFiles($this->stime,$this->etime);
         $table = $this->table;
         $fieldPos = $this->fieldPos;

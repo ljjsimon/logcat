@@ -3,56 +3,64 @@
 <head>
 <meta charset="utf-8">
 <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="view/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
-<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="view/js/echarts.min.js"></script>
-<script src="view/js/vue.min.js"></script>
-<script type="text/javascript" src="view/js/datetimepicker/bootstrap-datetimepicker.js" charset="UTF-8"></script>
-<script type="text/javascript" src="view/js/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<link href="view/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
 </head>
 <body>
-<form id="form" class="form-inline">
-    <div class="form-group">
-        <label>sum</label><input name="sum" v-model="sum">
+  <div class="container">
+    <div class="row">
+      <form id="form" class="form-inline">
+        <div class="form-group">
+            <label>路径</label><input class="form-control" placeholder="*" v-model="inputs.table">
+        </div>
+        <div class="form-group">
+            <label>加和</label><input class="form-control" v-bind:disabled="inputs.count" v-model="inputs.sum">
+        </div>
+        <div class="form-group">
+            <label>计数<input type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count"></label>
+        </div>
+        <div class="form-group">
+            <label>开始时间</label><input class="form-control form-datetime" placeholder="1小时前">
+        </div>
+        <div class="form-group">
+            <label>结束时间</label><input class="form-control form-datetime" placeholder="当前时间" v-model="inputs.etime">
+        </div>
+        <div class="form-group">
+            <label>间隔时间</label><input class="form-control" placeholder="小时" v-model="inputs.period">
+        </div>
+        <div class="form-group" v-for="(v,index) in inputs.where_f">
+            <label>条件</label><input class="form-control" v-model="inputs.where_f[index]">
+            <label>值</label><input class="form-control" v-model="inputs.where_v[index]">
+            <button type="button" class="btn btn-warning" v-on:click="delWhere(index)">x</button>
+        </div>
+        <button type="button" class="btn btn-info" v-on:click="addWhere">添加条件</button>
+        <button type="button" class="btn btn-primary" v-on:click="submit">提交</button>
+      </form>
     </div>
-    <div class="form-group">
-        <label>count</label><input name="count" v-model="count">
+    <div class="row">
+      <div id="chart" style="width: 600px;height:400px;"></div>
     </div>
-    <div class="form-group">
-        <label>stime</label><input id="stime" name="stime" v-model="stime">
-    </div>
-    <div class="form-group">
-        <label>etime</label><input id="etime" name="etime" v-model="etime">
-    </div>
-    <div class="form-group" v-for="(index,v) in where_if">
-        <label>条件</label><input name="where_f[]" v-model="where_f[index]">
-        <label>值</label><input name="where_v[]" v-model="where_v[index]">
-        <button type="button" v-on:click="delWhere(index)">x</button>
-    </div>
-    <button type="button" v-on:click="addWhere">添加条件</button>
-    <button type="button" v-on:click="submit">提交</button>
-</form>
-<div id="chart"></div>
+  </div>
+<script type="text/javascript" src="view/js/jquery-3.1.1.min.js" charset="UTF-8"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="view/datetimepicker/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="view/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<script src="view/js/echarts.min.js"></script>
+<script src="view/js/vue.min.js"></script>
 <script>
-$('#stime').datetimepicker({
-    language:  'zh-CN',
-    format: 'yyyy-mm-dd hh:ii:ss'
-});
-$('#etime').datetimepicker({
-    language:  'zh-CN',
-    format: 'yyyy-mm-dd hh:ii:ss'
-});
 var chart = echarts.init(document.getElementById('chart'))
 
 new Vue({
     el:"#form",
     data:{
-        sum: "",
-        count: "",
-        stime: "",
-        etime: ""
-        where_f: [],
-        where_v: [],
+        inputs:{
+            table: "",
+            sum: "",
+            count: false,
+            stime: "",
+            etime: "",
+            where_f: [],
+            where_v: [],
+        },
         config: {
             logFormatAs: []
         },
@@ -69,45 +77,44 @@ new Vue({
             series: []
         }
     },
-    beforeCreate: ()=>{
-        this.request({
+    created: function(){
+        $.getJSON({
             url: '/?getConfig=1',
-            complete: (data)=>{
+            success: (data)=>{
                 this.config = data
             }
         })
     },
-    methods: ()=>{
-        request: (option)=>{
-            if(typeof option.url == 'undefined'){
-                return false;
-            }
-            let xhr = new XMLHttpRequest();
-            xhr.open(typeof option.method == 'undefined' ? 'GET' : option.method, option.url)
-            if(typeof option.complete != 'undefined'){
-                xhr.onreadystatechange = option.complete
-            }
-            if(typeof option.data != 'undefined'){
-                xhr.send(option.data)
-            }else{
-                xhr.send()
-            }
-        },
-        submit: ()=>{
-            this.request({
-                url: '/'
+    mounted: function(){
+        $('.form-datetime').datetimepicker({
+            language: 'zh-CN',
+            format: 'yyyy-mm-dd hh:ii:ss'
+        });
+    },
+    methods: {
+        submit: function(){
+            let self = this
+            $.getJSON({
+                url: '/',
+                data: this.inputs,
+                success: this.render
             })
         },
-        render: ()=>{
+        render: function(data){
+            this.chartOption.xAxis.data = data.xData
+            this.chartOption.series = [{
+                type: 'line',
+                data: data.yData
+            }]
             chart.setOption(this.chartOption)
         },
-        addWhere: ()=>{
-            this.where_f.push('')
-            this.where_v.push('')
+        addWhere: function(){
+            this.inputs.where_f.push('')
+            this.inputs.where_v.push('')
         },
-        delWhere: (index)=>{
-            this.where_f.splice(index,1)
-            this.where_v.splice(index,1)
+        delWhere: function(index){
+            this.inputs.where_f.splice(index,1)
+            this.inputs.where_v.splice(index,1)
         }
     }
 })
