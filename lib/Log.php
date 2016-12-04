@@ -89,11 +89,24 @@ class Log{
             $index[$table][] = $pos;
         }
         fclose($fp);
-        file_put_contents($file.'.index', json_encode($index));
+
+        //compress
+        $tables = [];
+        $ifp = fopen($file.'.index','w');
+        foreach($index as $table=>$posArr){
+            array_unshift($posArr,'I*');
+            $posStr = call_user_func_array('pack', $posArr);
+            $start = ftell($ifp);
+            fwrite($ifp, $posStr);
+            $end = ftell($ifp);
+            $tables[$table] = [$start,$end];
+        }
+        fclose($ifp);
         return [
             $file => [
                 'stime'=>strtotime($stime),
-                'etime'=>strtotime($etime)
+                'etime'=>strtotime($etime),
+                'tables' => $tables
             ]
         ];
     }
@@ -180,7 +193,7 @@ class Log{
         return true;
     }
     
-    private function getPos(array $index,$table){
+    private function getPos($file,$table){
         $pos = [];
         foreach($index as $_table=>$_pos){
             if($table == '*' || strpos($_table,$table)!==false){
@@ -214,8 +227,7 @@ class Log{
                 continue;
             }
             
-            $index = json_decode(file_get_contents($file.'.index'),true);
-            $posArr = $this->getPos($index,$table);
+            $posArr = $this->getPos($file,$table);
             $logFp = fopen($file,'r');
             foreach($posArr as $pos){
                 fseek($logFp,$pos);
