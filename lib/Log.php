@@ -198,7 +198,7 @@ class Log{
                 fseek($fp,$ipos[0]);
                 $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
                 fclose($fp);
-                $pos = array_merge($pos,$_pos);
+                $pos = array_merge($pos,array_values($_pos));
             }
         }
         return $pos;
