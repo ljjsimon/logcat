@@ -194,7 +194,7 @@ class Log{
         $pos = [];
         foreach($tables as $_table=>$ipos){
             if($table == '*' || strpos($_table,$table)!==false){
-                $fp = fopen($indexFile);
+                $fp = fopen($indexFile,'r');
                 fseek($fp,$ipos[0]);
                 $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
                 fclose($fp);
@@ -258,10 +258,10 @@ class Log{
                 //period
                 $_time == 0 && $_time = $time;
                 if($this->period && ($time - $_time >= $this->period)){
-                    $res = 0;
-                    $_time = $time;
                     $xData[] = date('Y-m-d H:i:s',$time);
                     $yData[] = $res;
+                    $res = 0;
+                    $_time = $time;
                 }
             }
             fclose($logFp);

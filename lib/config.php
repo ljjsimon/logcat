@@ -16,8 +16,8 @@ $sysConfig = [
         "%http_path" => "([^\s\?]+)",
         "%http_query" => "\??(\S+?)?",
         "%http_method" => "(post|get|put|head|trace|delete|options)",
-        "%http_code" => "(\w{3})",
-        "%http_version" => "(http.+)"
+        "%http_status" => "(\w{3})",
+        "%server_protocol" => "(http.+)"
     ],
     "rootPath" => dirname(__FILE__).'/../'
 ];
