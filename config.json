@@ -1,6 +1,6 @@
 {
   "dataDir": "data",
-  "logFormat": "%ip,? ?%ip? %string %ip - [%string] \"%http_method %http_path%http_query %server_protocol\" %http_status %number \"%string\" %float %number \"%string\" ?%float?",
+  "logFormat": "%ip,? ?%ip? %string %ip - [%string] \"%http_method %http_path%http_query %server_protocol\" %http_status %number \"%string\" %float %number \"%string\"",
   "logFormatAs": [
     "client_ip",
     "x_forward_ip",
@@ -16,8 +16,7 @@
     "http_referer",
     "request_time",
     "request_length",
-    "http_user_agent",
-    "upstream_response_time"
+    "http_user_agent"
   ],
   "table": "path",
   "time": "time",
