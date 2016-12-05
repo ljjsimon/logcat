@@ -155,15 +155,12 @@ class Log{
 
     private function getLogFiles($stime,$etime){
         $logFiles = [];
-        foreach($this->mainIndex as $file=>$timeArr){
-            if($etime >= $timeArr['stime']){
-                $logFiles[] = $file;
-            }
-            if($stime <= $timeArr['etime']){
-                $logFiles[] = $file;
+        foreach($this->mainIndex as $file=>$fileIndex){
+            if($etime >= $fileIndex['stime'] && $stime <= $fileIndex['etime']){
+                $logFiles[$file] = $fileIndex['tables'];
             }
         }
-        return array_unique($logFiles);
+        return $logFiles;
     }
     
     private function buildFields($log){
@@ -193,10 +190,14 @@ class Log{
         return true;
     }
     
-    private function getPos($file,$table){
+    private function getPos($indexFile,$tables,$table){
         $pos = [];
-        foreach($index as $_table=>$_pos){
+        foreach($tables as $_table=>$ipos){
             if($table == '*' || strpos($_table,$table)!==false){
+                $fp = fopen($indexFile);
+                fseek($fp,$ipos[0]);
+                $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
+                fclose($fp);
                 $pos = array_merge($pos,$_pos);
             }
         }
@@ -222,12 +223,12 @@ class Log{
         $_time = 0;
         $xData = [];
         $yData = [];
-        foreach($logFiles as $file){
+        foreach($logFiles as $file=>$tables){
             if(!is_file($file)){
                 continue;
             }
             
-            $posArr = $this->getPos($file,$table);
+            $posArr = $this->getPos($file.'.index',$tables,$table);
             $logFp = fopen($file,'r');
             foreach($posArr as $pos){
                 fseek($logFp,$pos);
