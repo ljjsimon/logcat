@@ -211,20 +211,34 @@ class Log{
     private function prepareQuery(){
         !$this->etime && $this->etime = time();
         !$this->stime && $this->stime = $this->etime - 3600;
-        !$this->period && $this->period = 1;
+        !$this->period && $this->period = 3600;
         !$this->where && $this->where = [];
         !$this->table && $this->table = '*';
+    }
+    
+    /*
+     * 得到时间区间数组
+     */
+    private function getPeriodArr($stime,$etime,$period){
+        $periodArr = [];
+        for($i=$stime;$i+=$period;$i<=$etime){
+            $periodArr[$i] = 0;
+        }
+        $periodArr[$etime] = 0;
+        return $periodArr;
     }
 
     public function get(){
         $this->prepareQuery();
-        $logFiles = $this->getLogFiles($this->stime,$this->etime);
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $periodArr = $this->getPeriodArr($stime,$etime,$this->period);
+        $periodKey = array_keys($periodArr);
+        $logFiles = $this->getLogFiles($stime,$etime);
         $table = $this->table;
         $fieldPos = $this->fieldPos;
         $period = $this->period;
         $limit = 200;
-        $res = 0;
-        $_time = 0;
         $xData = [];
         $yData = [];
         foreach($logFiles as $file=>$tables){
@@ -242,38 +256,26 @@ class Log{
                 if(!is_numeric($time)){
                     $time = strtotime($time);
                 }
-                if($time > $this->etime || $time < $this->stime){
+                if($time > $etime || $time < $stime){
                     continue;
                 }
                 if(!$this->filterWhere($fields)){
                     continue;
                 }
-
+                
+                $timePos = int(($time - $stime)/$period);
+                $timeKey = $periodKey[$timePos];
                 //count
                 if($this->count){
-                    $res++;
+                    $periodArr[$timeKey]++;
                 }
 
                 //sum
                 elseif($this->sum){
-                    $res += $fields[$this->sum];
-                }
-
-                //period
-                $_time == 0 && $_time = $time;
-                if($this->period && ($time - $_time >= $this->period)){
-                    $xData[] = date('Y-m-d H:i:s',$time);
-                    $yData[] = $res;
-                    $res = 0;
-                    $_time = $time;
+                    $periodArr[$timeKey] += $fields[$this->sum];
                 }
             }
             fclose($logFp);
-        }
-        
-        if($res){
-            $xData[] = date('Y-m-d H:i:s',$time);
-            $yData[] = $res;
         }
 
         return compact('xData','yData');
