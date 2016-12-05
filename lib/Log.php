@@ -221,10 +221,10 @@ class Log{
      */
     private function getPeriodArr($stime,$etime,$period){
         $periodArr = [];
-        for($i=$stime;$i+=$period;$i<=$etime){
-            $periodArr[$i] = 0;
+        for($i=$stime+$period; $i<=$etime; $i+=$period){
+            $periodArr[] = $i;
         }
-        $periodArr[$etime] = 0;
+        $periodArr[] = $i;
         return $periodArr;
     }
 
@@ -232,15 +232,12 @@ class Log{
         $this->prepareQuery();
         $stime = $this->stime;
         $etime = $this->etime;
-        $periodArr = $this->getPeriodArr($stime,$etime,$this->period);
-        $periodKey = array_keys($periodArr);
-        $logFiles = $this->getLogFiles($stime,$etime);
+        $period = $this->period;
         $table = $this->table;
         $fieldPos = $this->fieldPos;
-        $period = $this->period;
-        $limit = 200;
-        $xData = [];
-        $yData = [];
+        $periodArr = $this->getPeriodArr($stime,$etime,$period);
+        $dataArr = array_fill(0,count($periodArr),0);
+        $logFiles = $this->getLogFiles($stime,$etime);
         foreach($logFiles as $file=>$tables){
             if(!is_file($file)){
                 continue;
@@ -263,21 +260,23 @@ class Log{
                     continue;
                 }
                 
-                $timePos = int(($time - $stime)/$period);
-                $timeKey = $periodKey[$timePos];
+                $timePos = intval(($time - $stime)/$period);
                 //count
                 if($this->count){
-                    $periodArr[$timeKey]++;
+                    $dataArr[$timePos]++;
                 }
 
                 //sum
                 elseif($this->sum){
-                    $periodArr[$timeKey] += $fields[$this->sum];
+                    $dataArr[$timePos] += $fields[$this->sum];
                 }
             }
             fclose($logFp);
         }
 
-        return compact('xData','yData');
+        return [
+            'xData' => array_map(function($v){return date('Y-m-d H:i:s',$v);}, $periodArr),
+            'yData' => $dataArr
+        ];
     }
 }
