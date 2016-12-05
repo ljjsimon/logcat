@@ -142,6 +142,10 @@ class Log{
                 //$period 小时
                 $val *= 3600;
                 break;
+            case 'datetimerange':
+                $this->stime = strtotime($val[0]);
+                $this->etime = strtotime($val[1]);
+                break;
             case 'stime':
             case 'etime':
                 if(!is_numeric($val)){

@@ -2,50 +2,56 @@
 <html>
 <head>
 <meta charset="utf-8">
-<link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="view/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
 </head>
 <body>
   <div class="container">
-    <div class="row">
-      <form id="form" class="form-inline">
-        <div class="form-group">
-            <label>路径</label><input class="form-control" placeholder="*" v-model="inputs.table">
-        </div>
-        <div class="form-group">
-            <label>加和</label><input class="form-control" v-bind:disabled="inputs.count" v-model="inputs.sum">
-        </div>
-        <div class="form-group">
-            <label>计数<input type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count"></label>
-        </div>
-        <div class="form-group">
-            <label>开始时间</label><input class="form-control form-datetime" placeholder="1小时前" v-model="inputs.stime">
-        </div>
-        <div class="form-group">
-            <label>结束时间</label><input class="form-control form-datetime" placeholder="当前时间" v-model="inputs.etime">
-        </div>
-        <div class="form-group">
-            <label>间隔时间</label><input class="form-control" placeholder="小时" v-model="inputs.period">
-        </div>
-        <div class="form-group" v-for="(v,index) in inputs.where_f">
-            <label>条件</label><input class="form-control" v-model="inputs.where_f[index]">
-            <label>值</label><input class="form-control" v-model="inputs.where_v[index]">
-            <button type="button" class="btn btn-warning" v-on:click="delWhere(index)">x</button>
-        </div>
-        <button type="button" class="btn btn-info" v-on:click="addWhere">添加条件</button>
-        <button type="button" class="btn btn-primary" v-on:click="submit">提交</button>
-      </form>
+    <div id="form">
+    <el-row>
+      <el-form :inline="true">
+        <el-form-item>
+          <el-input placeholder="路径 ( * )" v-model="inputs.table"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-input placeholder="加和" v-bind:disabled="inputs.count" v-model="inputs.sum"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">计数</el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-date-picker type="datetimerange" :picker-options="pickerOptions" placeholder="时间范围（默认1小时内）" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+        </el-form-item>
+        <el-form-item>
+          <el-input placeholder="间隔时间(小时)" v-model="inputs.period"></el-input>
+        </el-form-item>
+          <template class="form-group" v-for="(v,index) in inputs.where_f">
+            <el-form-item>
+              <el-input placeholder="条件" v-model="inputs.where_f[index]"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-input placeholder="值" v-model="inputs.where_v[index]"></el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button v-on:click="delWhere(index)">x</el-button>
+            </el-form-item>
+          </template>
+        <el-form-item>
+          <el-button v-on:click="addWhere">添加条件</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="primary" v-on:click="submit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-row>
     </div>
     <div class="row">
       <div id="chart" style="width: 600px;height:400px;"></div>
     </div>
   </div>
 <script type="text/javascript" src="view/js/jquery-3.1.1.min.js" charset="UTF-8"></script>
-<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="view/datetimepicker/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
-<script type="text/javascript" src="view/datetimepicker/locales/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
-<script src="view/js/echarts.min.js"></script>
 <script src="view/js/vue.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="view/js/echarts.min.js"></script>
 <script>
 var chart = echarts.init(document.getElementById('chart'))
 
@@ -56,8 +62,7 @@ new Vue({
             table: "",
             sum: "",
             count: false,
-            stime: "",
-            etime: "",
+            datetimerange: "",
             where_f: [],
             where_v: [],
         },
@@ -75,6 +80,33 @@ new Vue({
             },
             yAxis: {},
             series: []
+        },
+        pickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
         }
     },
     created: function(){
@@ -86,16 +118,10 @@ new Vue({
         })
     },
     mounted: function(){
-        $('.form-datetime').datetimepicker({
-            language: 'zh-CN',
-            format: 'yyyy-mm-dd hh:ii:ss'
-        });
     },
     methods: {
         submit: function(){
             let self = this
-            console.log(this.inputs)
-            return
             $.getJSON({
                 url: '/',
                 data: this.inputs,
