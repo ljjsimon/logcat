@@ -19,10 +19,10 @@
           <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">计数</el-checkbox>
         </el-form-item>
         <el-form-item>
-          <el-date-picker type="datetimerange" :picker-options="pickerOptions" placeholder="时间范围（默认1小时内）" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" placeholder="时间范围（默认1小时内）" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
         </el-form-item>
         <el-form-item>
-          <el-input placeholder="间隔时间(小时)" v-model="inputs.period"></el-input>
+          <el-input v-bind:readonly="appending" placeholder="间隔时间(小时)" v-model="inputs.period"></el-input>
         </el-form-item>
           <template class="form-group" v-for="(v,index) in inputs.where_f">
             <el-form-item>
@@ -39,7 +39,10 @@
           <el-button v-on:click="addWhere">添加条件</el-button>
         </el-form-item>
         <el-form-item>
-          <el-button class="primary" v-on:click="submit">提交</el-button>
+          <el-button class="" v-on:click="clear">还原</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="primary" v-on:click="submit">添加</el-button>
         </el-form-item>
       </el-form>
     </el-row>
@@ -58,6 +61,7 @@ var chart = echarts.init(document.getElementById('chart'))
 new Vue({
     el:"#form",
     data:{
+        appending: false,
         inputs:{
             table: "",
             sum: "",
@@ -91,7 +95,7 @@ new Vue({
               picker.$emit('pick', [start, end]);
             }
           }, {
-            test: '一天内',
+            text: '一天内',
             onClick(picker) {
               const end = new Data();
               const start = new Data();
@@ -135,6 +139,7 @@ new Vue({
     },
     methods: {
         submit: function(){
+            this.appending = true
             let self = this
             $.getJSON({
                 url: '/',
@@ -144,11 +149,12 @@ new Vue({
         },
         render: function(data){
             this.chartOption.xAxis.data = data.xData
-            this.chartOption.series = [{
+            this.chartOption.legend.data.push(this.inputs.table)
+            this.chartOption.series.push({
                 name: this.inputs.table,
                 type: 'line',
                 data: data.yData
-            }]
+            })
             chart.setOption(this.chartOption)
         },
         addWhere: function(){
@@ -158,6 +164,30 @@ new Vue({
         delWhere: function(index){
             this.inputs.where_f.splice(index,1)
             this.inputs.where_v.splice(index,1)
+        },
+        clear: function(){
+          this.chartOption =  {
+              title: "",
+              tooltip: {},
+              legend: {
+                  data: []
+              },
+              xAxis: {
+                  data: []
+              },
+              yAxis: {},
+              series: []
+          }
+          chart.clear()
+          this.inputs = {
+              table: "",
+              sum: "",
+              count: false,
+              datetimerange: "",
+              where_f: [],
+              where_v: [],
+          }
+          this.appending = false
         }
     }
 })

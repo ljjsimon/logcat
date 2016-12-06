@@ -139,6 +139,7 @@ class Log{
     }
 
     public function __set($name,$val){
+        is_string($val) && $val = trim($val);
         if($val === ''){
             return;
         }
@@ -207,17 +208,42 @@ class Log{
         return true;
     }
     
+    /*
+     * @indexFile 索引文件名
+     * @tables 日志文件包含的所有table
+     * @table 要查找的table
+     */
     private function getPos($indexFile,$tables,$table){
-        $pos = [];
-        foreach($tables as $_table=>$ipos){
-            if($table == '*' || strpos($_table,$table)!==false){
-                $fp = fopen($indexFile,'r');
-                fseek($fp,$ipos[0]);
-                $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
-                fclose($fp);
-                $pos = array_merge($pos,array_values($_pos));
-            }
+        if($table == '*'){
+            $pos = unpack('I*',file_get_contents($indexFile));
+            return $pos;
         }
+
+        $pos = [];
+        $start = true; //前面严格匹配
+        $end = true; //后面严格匹配
+        $len = strlen($table);
+        if($table[$len-1] == '%'){
+            $end = false;
+            $table = substr($table,0,$len-1);
+        }
+        if($table[0] == '%'){
+            $start = false;
+            $table = substr($table,1,strlen($table));
+        }
+        $len = strlen($table);
+
+        $fp = fopen($indexFile,'r');
+        foreach($tables as $_table=>$ipos){
+            $i = strpos($_table,$table);
+            if($i === false || ($start && $i!=0) || ($end && (strlen($_table)-$i)!=$len)){
+                continue;
+            }
+            fseek($fp,$ipos[0]);
+            $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
+            $pos = array_merge($pos,array_values($_pos));
+        }
+        fclose($fp);
         return $pos;
     }
 
