@@ -14,8 +14,8 @@ class Log{
         $this->fieldPos = $fieldPos;
         $tablePos = $fieldPos[$config['table']];
         $timePos = $fieldPos[$config['time']];
-        $mainIndex = $this->getMainIndex();
         $mainIndexChanged = false;
+        $mainIndex = $this->getMainIndex($mainIndexChanged);
         //一级目录
         $dir = $config['rootPath'].$config['dataDir'];
         $_dh = opendir($dir);
@@ -38,7 +38,7 @@ class Log{
                     continue;
                 }
                 $extension = pathinfo($file,PATHINFO_EXTENSION);
-                if($extension == 'index' || (array_key_exists($_file,$mainIndex) && filemtime($_file)== $mainIndex['mtime'])){
+                if($extension == 'index' || array_key_exists($_file,$mainIndex)){
                     continue;
                 }
                 $mainIndex[$_file] = $this->_makeIndex($_file,$logFormat,$tablePos,$timePos);
@@ -47,7 +47,10 @@ class Log{
             closedir($dh);
         }
         closedir($_dh);
-        $this->mainIndex = $this->saveMainIndex($mainIndex, $mainIndexChanged);
+        $this->mainIndex = $mainIndex;
+        if($mainIndexChanged){
+            $this->saveMainIndex($mainIndex);
+        }
         $this->writeErrorLog();
     }
 
@@ -74,8 +77,8 @@ class Log{
             if(empty($line)){
                 continue;
             }
-            preg_match($logFormat, $line, $match);
-            if(empty($match)){
+            $res = preg_match($logFormat, $line, $match);
+            if(!$res){
                 $this->errorLog .= "$file, line $l\n";
                 continue;
             }
@@ -115,26 +118,24 @@ class Log{
     /*
      * make index for files by time
      */
-    private function getMainIndex(){
+    private function getMainIndex(&$mainIndexChanged){
         $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
         if(!file_exists($fileName)){
             return [];
         }
-        return json_decode(file_get_contents($fileName),true);
-    }
-    
-    private function saveMainIndex($mainIndex, $mainIndexChanged=false){
-        $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
+        $mainIndex = json_decode(file_get_contents($fileName),true);
         foreach($mainIndex as $file=>$arr){
-            if(!file_exists($file)){
+            if(!file_exists($file) || filemtime($file) != $arr['mtime']){
                 unset($mainIndex[$file]);
                 $mainIndexChanged = true;
             }
         }
-        if($mainIndexChanged){
-            file_put_contents($fileName, json_encode($mainIndex));
-        }
         return $mainIndex;
+    }
+    
+    private function saveMainIndex($mainIndex){
+        $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
+        file_put_contents($fileName, json_encode($mainIndex));
     }
 
     public function __set($name,$val){
