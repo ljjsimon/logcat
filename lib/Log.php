@@ -168,12 +168,10 @@ class Log{
     }
     
     private function buildFields($log){
-        $fields = [];
         preg_match($this->logFormat, $log, $match);
         if(!$match){
             return $fields;
         }
-        $fieldPos = $this->fieldPos;
         array_shift($match);
         $fields = array_combine($this->config['logFormatAs'],$match);
         
