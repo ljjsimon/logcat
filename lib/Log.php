@@ -186,6 +186,17 @@ class Log{
 
     private function filterWhere($match){
         $where = $this->where;
+        if(isset($this->config['http_query'])){
+            $http_query = $this->config['http_query'];
+            if($http_query && $match[$http_query]){
+                $query = explode('&',$match[$http_query]);
+                foreach($query as $v){
+                    $pos = $strpos($v,'=');
+                    $match[$http_query.'.'.substr($v,0,$pos)] = $substr($v,$pos+1);
+                }
+            }
+        }
+        
         foreach($where as $field=>$value){
             if($match[$field] != $value){
                 return false;

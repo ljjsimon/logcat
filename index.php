@@ -44,6 +44,10 @@ if(isset($_GET['datetimerange'])){
     $log->datetimerange = $_GET['datetimerange'];
 }
 
+if(isset($_GET['group'])){
+    $log->group = $_GET['group'];
+}
+
 if(isset($_GET['getConfig'])){
     echo json_encode($config);
 }elseif($_GET){
