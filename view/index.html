@@ -83,6 +83,22 @@ new Vue({
         },
         pickerOptions: {
           shortcuts: [{
+            text: '半小时内',
+            onClick(picker) {
+              const end = new Data();
+              const start = new Date();
+              start.setTime(start.getTime() - 1800 * 1000);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            test: '一天内',
+            onClick(picker) {
+              const end = new Data();
+              const start = new Data();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
             text: '最近一周',
             onClick(picker) {
               const end = new Date();
