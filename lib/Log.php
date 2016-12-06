@@ -185,11 +185,11 @@ class Log{
             if($fields[$http_query]){
                 $query = explode('&',$fields[$http_query]);
                 foreach($query as $v){
-                    $pos = $strpos($v,'=');
+                    $pos = strpos($v,'=');
                     if($pos===false){
                         continue;
                     }
-                    $fields[$http_query.'.'.substr($v,0,$pos)] = $substr($v,$pos+1);
+                    $fields[$http_query.'.'.substr($v,0,$pos)] = substr($v,$pos+1);
                 }
                 unset($fields[$http_query]);
             }

@@ -145,6 +145,7 @@ new Vue({
         render: function(data){
             this.chartOption.xAxis.data = data.xData
             this.chartOption.series = [{
+                name: this.inputs.table,
                 type: 'line',
                 data: data.yData
             }]

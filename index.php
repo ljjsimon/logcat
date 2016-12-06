@@ -24,8 +24,8 @@ if(isset($_GET['table'])){
     $log->table = $_GET['table'];
 }
 
-if(isset($_GET['where_n']) && isset($_GET['where_v'])){
-    $log->where = array_combine($_GET['where_n'], $_GET['where_v']);
+if(isset($_GET['where_f']) && isset($_GET['where_v'])){
+    $log->where = array_combine($_GET['where_f'], $_GET['where_v']);
 }
 
 if(isset($_GET['period'])){
