@@ -1,6 +1,12 @@
 <?php
+if(empty($_GET)){
+    echo file_get_contents('view/index.html');
+    exit;
+}
+
 include "lib/Log.php";
 require "lib/config.php";
+set_time_limit(0);
 date_default_timezone_set('ASIA/Shanghai');
 
 $config = json_decode(file_get_contents('./config.json'),true);
@@ -8,51 +14,25 @@ $config = json_decode(file_get_contents('./config.json'),true);
 $log = new Log;
 $log->makeIndex(array_merge($sysConfig,$config));
 
-if(isset($_GET['sum'])){
-    $log->sum = $_GET['sum'];
-}
+isset($_GET['sum']) && $log->sum = $_GET['sum'];
+isset($_GET['count']) && $_GET['count']!='false' && $log->count = $_GET['count'];
+isset($_GET['select']) && $log->select = $_GET['select'];
+isset($_GET['table']) && $log->table = $_GET['table'];
+isset($_GET['period']) && $log->period = $_GET['period'];
+isset($_GET['stime']) && $log->stime = $_GET['stime'];
+isset($_GET['etime']) && $log->etime = $_GET['etime'];
+isset($_GET['datetimerange']) && $log->datetimerange = $_GET['datetimerange'];
+isset($_GET['group']) && $log->group = $_GET['group'];
 
-if(isset($_GET['count'])){
-    $log->count = $_GET['count'];
-}
-
-if(isset($_GET['select'])){
-    $log->select = $_GET['select'];
-}
-
-if(isset($_GET['table'])){
-    $log->table = $_GET['table'];
-}
 
 if(isset($_GET['where_f']) && isset($_GET['where_v'])){
     $log->where = array_combine($_GET['where_f'], $_GET['where_v']);
 }
 
-if(isset($_GET['period'])){
-    $log->period = $_GET['period'];
-}
-
-if(isset($_GET['stime'])){
-    $log->stime = $_GET['stime'];
-}
-
-if(isset($_GET['etime'])){
-    $log->etime = $_GET['etime'];
-}
-
-if(isset($_GET['datetimerange'])){
-    $log->datetimerange = $_GET['datetimerange'];
-}
-
-if(isset($_GET['group'])){
-    $log->group = $_GET['group'];
-}
 
 if(isset($_GET['getConfig'])){
     echo json_encode($config);
 }elseif($_GET){
     $data = $log->get();
     echo json_encode($data);
-}else{
-    echo file_get_contents('view/index.html');
 }
