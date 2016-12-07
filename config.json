@@ -26,7 +26,7 @@
     "sender_id": 1,
     "server_addr": ""
   },
-  "server":{
-    "1": "1"
+  "sender_log_file":{
+    "1": "nginx1/nginx_access.log"
   }
 }

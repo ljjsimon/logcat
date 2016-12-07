@@ -318,4 +318,8 @@ class Log{
             'yData' => $dataArr
         ];
     }
+    
+    public function writeLog($file,$log){
+        file_put_contents($file,$log,FILE_APPEND);
+    }
 }

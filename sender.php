@@ -6,6 +6,10 @@ if(!isset($config['sender'])){
 set_time_limit(0);
 extract($config['sender']);//$log_file, $sender_id, $server_addr
 $pos = 0;
+if(is_file('sender_log_pos')){
+    $str = file_get_contents('sender_log_pos');
+    is_numeric($str) && $pos = $str;
+}
 
 function send($server_addr,$sender_id,$log){
     $ch = curl_init();
@@ -20,7 +24,11 @@ function send($server_addr,$sender_id,$log){
 while(1){
     echo '1';
     $fp = fopen($log_file,'r');
-    fseek($fp,$pos);
+    $res = fseek($fp,$pos);
+    if($res == -1){
+        $pos = 0;
+        continue;
+    }
     $log = '';
     while(!feof($fp)){
         $log .= fgets($fp);
@@ -30,5 +38,6 @@ while(1){
     if($log){
         send($server_addr,$sender_id,$log);
     }
+    file_put_contents('sender_log_pos',$pos);
     sleep(1);
 }

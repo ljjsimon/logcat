@@ -1,5 +1,5 @@
 <?php
-if(empty($_GET)){
+if(empty($_GET) && empty($_POST)){
     echo file_get_contents('view/index.html');
     exit;
 }
@@ -12,6 +12,11 @@ date_default_timezone_set('ASIA/Shanghai');
 $config = json_decode(file_get_contents('./config.json'),true);
 
 $log = new Log;
+
+if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['dataDir'].'/'.$config['sender_log_file'][$_POST['sender_id']])){
+    $log->writeLog($config['dataDir'].'/'.$config['sender_log_file'][$_POST['sender_id']],$_POST['log']);
+}
+
 $log->makeIndex(array_merge($sysConfig,$config));
 
 isset($_GET['sum']) && $log->sum = $_GET['sum'];
