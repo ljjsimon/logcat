@@ -20,5 +20,13 @@
   ],
   "table": "path",
   "time": "time",
-  "http_query": "http_query"
+  "http_query": "http_query",
+  "sender":{
+    "log_file": "a.txt",
+    "sender_id": 1,
+    "server_addr": ""
+  },
+  "server":{
+    "1": "1"
+  }
 }
