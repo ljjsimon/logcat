@@ -24,7 +24,7 @@
   "sender":{
     "log_file": "a.txt",
     "sender_id": 1,
-    "server_addr": ""
+    "server_addr": "http://localhot:8080"
   },
   "sender_log_file":{
     "1": "nginx1/nginx_access.log"
