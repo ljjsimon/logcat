@@ -1,7 +1,7 @@
 <?php
 if(empty($_GET) && empty($_POST)){
     echo file_get_contents('view/index.html');
-    exit;
+    flush();
 }
 
 include "lib/Log.php";

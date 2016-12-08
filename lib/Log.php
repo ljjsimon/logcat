@@ -216,6 +216,7 @@ class Log{
     private function getPos($indexFile,$tables,$table){
         if($table == '*'){
             $pos = unpack('I*',file_get_contents($indexFile));
+            sort($pos);
             return $pos;
         }
 
