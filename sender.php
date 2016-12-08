@@ -13,7 +13,7 @@ if(is_file('sender_log_pos')){
 
 function send($server_addr,$sender_id,$log){
     $ch = curl_init();
-    curl_setopt($ch,CURLOPT_URL,$sender_id);
+    curl_setopt($ch,CURLOPT_URL,$server_addr);
     curl_setopt($ch,CURLOPT_POST,1);
     curl_setopt($ch,CURLOPT_POSTFIELDS,compact('sender_id','log'));
     $output = curl_exec($ch);
