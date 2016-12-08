@@ -38,7 +38,7 @@ while(1){
     }
     fclose($fp);
     echo $log;
-    if($log){
+    if($log!==''){
         send($server_addr,$sender_id,$log);
         $log = '';
     }

@@ -320,6 +320,9 @@ class Log{
     }
     
     public function writeLog($file,$log){
+        if($log===''){
+            return;
+        }
         file_put_contents($file,$log,FILE_APPEND);
     }
 }
