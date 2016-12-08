@@ -5,11 +5,10 @@ if(empty($_GET) && empty($_POST)){
 }
 
 include "lib/Log.php";
-require "lib/config.php";
+require "lib/config.php"; //$sysConfig
+require "config.php"; //$config
 set_time_limit(0);
 date_default_timezone_set('ASIA/Shanghai');
-
-$config = json_decode(file_get_contents('./config.json'),true);
 
 $log = new Log;
 
