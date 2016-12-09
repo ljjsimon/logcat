@@ -55,16 +55,16 @@ $config = [
   "sender" => [
     /* 日志文件位置
      */
-    "log_file": "a.txt",
+    "log_file" => "a.txt",
 
     /* 收集器编号
      */
-    "sender_id": 1,
+    "sender_id" => 1,
 
     /* 服务器地址
      * 收集器会把日志文件增量部分通过 http post 发送给服务器
      */
-    "server_addr": "http://localhot:8080"
+    "server_addr" => "http://localhot:8080"
   ],
 
   /* 日志收集服务器配置
@@ -72,8 +72,9 @@ $config = [
    * 数组的 key 对应 收集器的id
    * value 对应将收集到的日志写入的本地文件位置
    * 此位置在 dataDir 下，子目录需要自己建立，只能有一层子目录
+   * 有多少个收集器，就在数组里写多少个配置
    */
   "sender_log_file" => [
-    "1": "nginx1/nginx_access.log"
+    "1" => "nginx1/nginx_access.log"
   ]
 ];
