@@ -4,11 +4,10 @@ if(empty($_GET) && empty($_POST)){
     flush();
 }
 
+set_time_limit(0);
 include "lib/Log.php";
 require "lib/config.php"; //$sysConfig
 require "config.php"; //$config
-set_time_limit(0);
-date_default_timezone_set('ASIA/Shanghai');
 
 $log = new Log;
 
@@ -17,7 +16,9 @@ if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['sender_l
     exit;
 }
 
-$log->makeIndex(array_merge($sysConfig,$config));
+$config = array_merge($sysConfig,$config);
+$log->makeIndex($config);
+date_default_timezone_set($config['timezone']);
 
 isset($_GET['sum']) && $log->sum = $_GET['sum'];
 isset($_GET['count']) && $_GET['count']!='false' && $log->count = $_GET['count'];

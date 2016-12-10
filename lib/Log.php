@@ -181,8 +181,8 @@ class Log{
         array_shift($match);
         $fields = array_combine($this->config['logFormatAs'],$match);
         
-        if(isset($this->config['http_query'])){
-            $http_query = $this->config['http_query'];
+        if(isset($this->config['url_query'])){
+            $http_query = $this->config['url_query'];
             if($fields[$http_query]){
                 $query = explode('&',$fields[$http_query]);
                 foreach($query as $v){

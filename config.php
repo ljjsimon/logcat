@@ -8,8 +8,11 @@ $config = [
   /* 日志文件每行对应的格式
    * 转义字符以%开始，意义参见lib/config.php
    * 转义字符最终会被替换为正则表达式
+   * 不确定是否存在的部分可以加'?'，其他正则表达式符号会被替换
+   * lib/config.php 里提供了其他转义字符，通常建议转义字符越精确越好
+   * 但是通常 nginx 会把未获得的地段用'-'替换，因此这里所有字段都用 %str (非空字符串) 定义
    */
-  "logFormat" => "%ip,? ?%ip? %string %ip - [%string] \"%http_method %http_path%http_query %server_protocol\" %http_status %number \"%string\" %float %number \"%string\"",
+  "logFormat" => '%str,? ?%str %str %str [%string] "%str %url_path%url_query %str" %number %number "%str" "%string"',
 
   /* 日志格式中每个转义字符字段对应的名称
    * 用来在统计的时候使用
@@ -21,14 +24,12 @@ $config = [
     "server_ip",
     "time",
     "method",
-    "http_path",
-    "http_query",
+    "url_path",
+    "url_query",
     "http_protocol",
     "http_status",
     "body_bytes_sent",
     "http_referer",
-    "request_time",
-    "request_length",
     "http_user_agent"
   ],
 
@@ -36,7 +37,7 @@ $config = [
    * 将每次统计中最常使用的字段定义为主索引
    * nginx 日志推荐 http_path
    */
-  "table" => "http_path",
+  "table" => "url_path",
 
   /* 时间对应的转义字符字段名称
    * 次字段对应该行日志生成的时间
@@ -47,7 +48,12 @@ $config = [
    * （可选）
    * 统计时该字段可以被拆开设置搜索条件
    */
-  "http_query" => "http_query",
+  "url_query" => "url_query",
+
+  /* 时区
+   * 参考 http://php.net/manual/en/timezones.php
+   */
+  "timezone" => 'Asia/Shanghai',
 
   /* 日志搜集器配置
    * （可选，收集器配置）
@@ -55,7 +61,7 @@ $config = [
   "sender" => [
     /* 日志文件位置
      */
-    "log_file" => "a.txt",
+    "log_file" => "nginx_access.log",
 
     /* 收集器编号
      */

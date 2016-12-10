@@ -62,6 +62,11 @@
             <el-button type="primary" v-on:click="submit">提交</el-button>
           </el-tooltip>
         </el-form-item>
+        <el-form-item>
+          <el-tooltip content="加载例子后点击提交试试。再去掉条件，再点击提交" placement="bottom">
+            <el-button v-on:click="example">例子</el-button>
+          </el-tooltip>
+        </el-form-item>
       </el-row>
       </el-form>
     </div>
@@ -83,8 +88,8 @@ new Vue({
         inputs:{
             table: "",
             sum: "",
-            count: false,
-            datetimerange: "",
+            count: true,
+            datetimerange: [],
             where_f: [],
             where_v: [],
         },
@@ -156,6 +161,17 @@ new Vue({
         })
     },
     methods: {
+        example: function(){
+            this.inputs.table = '%admin%'
+            console.log(this.inputs.datetimerange)
+            let stime = new Date()
+            stime.setTime(1471903200000)
+            let etime = new Date()
+            etime.setTime(1471939200000)
+            this.inputs.datetimerange = [stime,etime]
+            this.inputs.where_f.push('url_query.id')
+            this.inputs.where_v.push('1234')
+        },
         submit: function(){
             this.appending = true
             let self = this
