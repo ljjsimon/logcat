@@ -268,7 +268,7 @@ class Log{
         return $periodArr;
     }
 
-    public function get(){
+    public function _get(){
         $this->prepareQuery();
         $stime = $this->stime;
         $etime = $this->etime;
@@ -317,6 +317,70 @@ class Log{
         return [
             'xData' => array_map(function($v){return date('Y-m-d H:i:s',$v);}, $periodArr),
             'yData' => $dataArr
+        ];
+    }
+
+    public function get(){
+        $this->prepareQuery();
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $period = $this->period;
+        $table = $this->table;
+        $fieldPos = $this->fieldPos;
+        $logFiles = $this->getLogFiles($stime,$etime);
+        $group = $this->group;
+        if(!$group){
+            $periodArr = $this->getPeriodArr($stime,$etime,$period);
+            $dataArr = array_fill(0,count($periodArr),0);
+        }else{
+            $dataArr = [];
+        }
+
+        foreach($logFiles as $file=>$tables){
+            if(!is_file($file)){
+                continue;
+            }
+            
+            $posArr = $this->getPos($file.'.index',$tables,$table);
+            $logFp = fopen($file,'r');
+            foreach($posArr as $pos){
+                fseek($logFp,$pos);
+                $log = fgets($logFp);
+                $fields = $this->buildFields($log);
+                $time = $fields[$this->config['time']];
+                if(!is_numeric($time)){
+                    $time = strtotime($time);
+                }
+                if($time > $etime || $time < $stime){
+                    continue;
+                }
+                if(!$this->filterWhere($fields)){
+                    continue;
+                }
+
+                $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
+                if($this->count){
+                    $value = 1;
+                }
+                elseif($this->sum){
+                    $value = $fields[$this->sum];
+                }
+
+                if(isset($dataArr[$key])){
+                    $dataArr[$key] += $value;
+                }else{
+                    $dataArr[$key] = $value;
+                }
+
+            }
+            fclose($logFp);
+        }
+
+        $xData = $group ? array_keys($dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $periodArr);
+
+        return [
+            'xData' => $xData,
+            'yData' => array_values($dataArr)
         ];
     }
     

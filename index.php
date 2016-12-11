@@ -17,8 +17,8 @@ if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['sender_l
 }
 
 $config = array_merge($sysConfig,$config);
-$log->makeIndex($config);
 date_default_timezone_set($config['timezone']);
+$log->makeIndex($config);
 
 isset($_GET['sum']) && $log->sum = $_GET['sum'];
 isset($_GET['count']) && $_GET['count']!='false' && $log->count = $_GET['count'];

@@ -30,6 +30,9 @@
         <el-form-item>
           <el-input v-bind:readonly="appending" placeholder="间隔时间(小时)" v-model="inputs.period"></el-input>
         </el-form-item>
+        <el-form-item>
+          <el-input v-bind:readonly="appending" placeholder="group by" v-model="inputs.group"></el-input>
+        </el-form-item>
       </el-row>
       <el-row style="width:1080px">
           <template class="form-group" v-for="(v,index) in inputs.where_f">
@@ -90,6 +93,8 @@ new Vue({
             sum: "",
             count: true,
             datetimerange: [],
+            period: 1,
+            group: '',
             where_f: [],
             where_v: [],
         },
@@ -186,7 +191,7 @@ new Vue({
             this.chartOption.legend.data.push(this.inputs.table)
             this.chartOption.series.push({
                 name: this.inputs.table,
-                type: 'line',
+                type: this.inputs.group ? 'bar' : 'line',
                 data: data.yData
             })
             chart.setOption(this.chartOption)
@@ -218,6 +223,8 @@ new Vue({
               sum: "",
               count: false,
               datetimerange: "",
+              period: 1,
+              group: '',
               where_f: [],
               where_v: [],
           }
