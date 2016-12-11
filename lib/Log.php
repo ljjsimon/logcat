@@ -268,58 +268,6 @@ class Log{
         return $periodArr;
     }
 
-    public function _get(){
-        $this->prepareQuery();
-        $stime = $this->stime;
-        $etime = $this->etime;
-        $period = $this->period;
-        $table = $this->table;
-        $fieldPos = $this->fieldPos;
-        $periodArr = $this->getPeriodArr($stime,$etime,$period);
-        $dataArr = array_fill(0,count($periodArr),0);
-        $logFiles = $this->getLogFiles($stime,$etime);
-        foreach($logFiles as $file=>$tables){
-            if(!is_file($file)){
-                continue;
-            }
-            
-            $posArr = $this->getPos($file.'.index',$tables,$table);
-            $logFp = fopen($file,'r');
-            foreach($posArr as $pos){
-                fseek($logFp,$pos);
-                $log = fgets($logFp);
-                $fields = $this->buildFields($log);
-                $time = $fields[$this->config['time']];
-                if(!is_numeric($time)){
-                    $time = strtotime($time);
-                }
-                if($time > $etime || $time < $stime){
-                    continue;
-                }
-                if(!$this->filterWhere($fields)){
-                    continue;
-                }
-                
-                $timePos = intval(($time - $stime)/$period);
-                //count
-                if($this->count){
-                    $dataArr[$timePos]++;
-                }
-
-                //sum
-                elseif($this->sum){
-                    $dataArr[$timePos] += $fields[$this->sum];
-                }
-            }
-            fclose($logFp);
-        }
-
-        return [
-            'xData' => array_map(function($v){return date('Y-m-d H:i:s',$v);}, $periodArr),
-            'yData' => $dataArr
-        ];
-    }
-
     public function get(){
         $this->prepareQuery();
         $stime = $this->stime;
