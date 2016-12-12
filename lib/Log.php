@@ -1,6 +1,6 @@
 <?php
 class Log{
-    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog=[];
+    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
     private $select,$sum,$count,$table,$where,$group;
     private $stime,$etime,$period;
 

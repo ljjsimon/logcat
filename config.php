@@ -3,16 +3,16 @@ $config = [
   /* 放置日志文件的总目录
    * 将日志文件放在此目录下的子目录下
    */
-  "dataDir" => "data",
+  "dataDir" => "data1",
 
   /* 日志文件每行对应的格式
-   * 转义字符以%开始，意义参见lib/config.php
+   * 转义字符以%开始，%str 为不包含空格的字符串，%string 为包含空格的字符串，其他参见lib/config.php
    * 转义字符最终会被替换为正则表达式
    * 不确定是否存在的部分可以加'?'，其他正则表达式符号会被替换
    * lib/config.php 里提供了其他转义字符，通常建议转义字符越精确越好
    * 但是通常 nginx 会把未获得的地段用'-'替换，因此这里所有字段都用 %str (非空字符串) 定义
    */
-  "logFormat" => '%str,? ?%str %str %str [%string] "%str %url_path%url_query %str" %number %number "%str" "%string"',
+  "logFormat" => '%str,? ?%str %str %str [%string] "%str %url_path%url_query %str" %number %number "%str" %float %number "%string"',
 
   /* 日志格式中每个转义字符字段对应的名称
    * 用来在统计的时候使用
@@ -30,6 +30,8 @@ $config = [
     "http_status",
     "body_bytes_sent",
     "http_referer",
+    "f1",
+    "n1",
     "http_user_agent"
   ],
 

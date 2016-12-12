@@ -1,5 +1,5 @@
 <?php
-if(empty($_GET) && empty($_POST)){
+if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
     echo file_get_contents('view/index.html');
     flush();
 }

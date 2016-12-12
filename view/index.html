@@ -111,6 +111,18 @@ new Vue({
                 data: []
             },
             yAxis: {},
+            dataZoom: [
+                {
+                    type: 'slider',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                }
+            ],
             series: []
         },
         pickerOptions: {
@@ -179,11 +191,14 @@ new Vue({
         },
         submit: function(){
             this.appending = true
+            chart.showLoading()
             let self = this
             $.getJSON({
                 url: '/',
                 data: this.inputs,
                 success: this.render
+            }).done(function(){
+                chart.hideLoading()
             })
         },
         render: function(data){
