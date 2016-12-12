@@ -230,6 +230,18 @@ new Vue({
                   data: []
               },
               yAxis: {},
+              dataZoom: [
+                {
+                    type: 'slider',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                }
+              ],
               series: []
           }
           chart.clear()
