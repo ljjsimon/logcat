@@ -8,7 +8,7 @@ set_time_limit(0);
 include "lib/Log.php";
 require "lib/config.php"; //$sysConfig
 require "config.php"; //$config
-
+use lib\Log;
 $log = new Log;
 
 if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['sender_log_file'][$_POST['sender_id']])){
