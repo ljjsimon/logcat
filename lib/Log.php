@@ -2,7 +2,7 @@
 namespace lib;
 class Log{
     private $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
-    private $select,$sum,$count,$table,$where,$group;
+    private $sum,$count,$table,$where,$group;
     private $stime,$etime,$period;
 
     public function makeIndex($config){
@@ -202,7 +202,22 @@ class Log{
     private function filterWhere(&$match){
         $where = $this->where;
         foreach($where as $field=>$value){
-            if($match[$field] != $value){
+            $pos = strpos($field,'#');
+            $sign = '';
+            if($pos){
+                $sign = substr($field,$pos);
+                $field = substr($field,0,$pos);
+            }
+            $_value = $match[$field];
+            if($sign == '<' && $_value >= $value){
+                return false;
+            }elseif($sign == '<=' && $_value > $value){
+                return false;
+            }elseif($sign == '>' && $_value <= $value){
+                return false;
+            }elseif($sign == '>=' && $_value < $value){
+                return false;
+            }elseif(($sign == '=' || $sign == '==' || $sign == '') && $_value != $value){
                 return false;
             }
         }
