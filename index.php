@@ -1,5 +1,5 @@
 <?php
-if(empty($_GET) && empty($_POST)){
+if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
     echo file_get_contents('view/index.html');
     flush();
 }
@@ -8,7 +8,7 @@ set_time_limit(0);
 include "lib/Log.php";
 require "lib/config.php"; //$sysConfig
 require "config.php"; //$config
-
+use lib\Log;
 $log = new Log;
 
 if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['sender_log_file'][$_POST['sender_id']])){
@@ -22,7 +22,6 @@ $log->makeIndex($config);
 
 isset($_GET['sum']) && $log->sum = $_GET['sum'];
 isset($_GET['count']) && $_GET['count']!='false' && $log->count = $_GET['count'];
-isset($_GET['select']) && $log->select = $_GET['select'];
 isset($_GET['table']) && $log->table = $_GET['table'];
 isset($_GET['period']) && $log->period = $_GET['period'];
 isset($_GET['stime']) && $log->stime = $_GET['stime'];

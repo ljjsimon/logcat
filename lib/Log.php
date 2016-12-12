@@ -1,7 +1,8 @@
 <?php
+namespace lib;
 class Log{
-    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog=[];
-    private $select,$sum,$count,$table,$where,$group;
+    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
+    private $sum,$count,$table,$where,$whereSign,$group;
     private $stime,$etime,$period;
 
     public function makeIndex($config){
@@ -158,6 +159,24 @@ class Log{
                     $val = strtotime($val);
                 }
                 break;
+            case 'where':
+                $_val = $val;
+                $val = [];
+                $whereSign = [];
+                foreach($_val as $field=>$value){
+                    $pos = strpos($field,'#');
+                    $sign = '';
+                    if($pos){
+                        $sign = substr($field,$pos+1);
+                        $field = substr($field,0,$pos);
+                    }else{
+                        $sign = '=';
+                    }
+                    $val[$field] = $value;
+                    $whereSign[$field] = $sign == '==' ? '=' : $sign;
+                }
+                $this->whereSign = $whereSign;
+                break;
         }
         
         $this->$name = $val;
@@ -200,8 +219,19 @@ class Log{
 
     private function filterWhere(&$match){
         $where = $this->where;
+        $whereSign = $this->whereSign;
         foreach($where as $field=>$value){
-            if($match[$field] != $value){
+            $sign = isset($whereSign[$field]) ? $whereSign[$field] : '=';
+            $_value = $match[$field];
+            if($sign == '<' && $_value >= $value){
+                return false;
+            }elseif($sign == '<=' && $_value > $value){
+                return false;
+            }elseif($sign == '>' && $_value <= $value){
+                return false;
+            }elseif($sign == '>=' && $_value < $value){
+                return false;
+            }elseif($sign == '=' && $_value !== $value){
                 return false;
             }
         }
@@ -253,6 +283,7 @@ class Log{
         !$this->stime && $this->stime = $this->etime - 3600;
         !$this->period && $this->period = 3600;
         !$this->where && $this->where = [];
+        !$this->whereSign && $this->whereSign = [];
         !$this->table && $this->table = '*';
     }
     
