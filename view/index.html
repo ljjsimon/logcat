@@ -66,6 +66,9 @@
           </el-tooltip>
         </el-form-item>
         <el-form-item>
+          <el-switch v-bind:disabled="!appending" v-model="autoRequest">
+        </el-form-item>
+        <el-form-item>
           <el-tooltip content="加载例子后点击提交试试。再去掉条件，再点击提交" placement="bottom">
             <el-button v-on:click="example">例子</el-button>
           </el-tooltip>
@@ -85,179 +88,204 @@
 var chart = echarts.init(document.getElementById('chart'))
 
 new Vue({
-    el:"#form",
-    data:{
-        appending: false,
-        inputs:{
-            table: "",
-            sum: "",
-            count: true,
-            datetimerange: [],
-            period: 1,
-            group: '',
-            where_f: [],
-            where_v: [],
-        },
-        config: {
-            logFormatAs: []
-        },
-        chartOption: {
-            title: "",
-            tooltip: {},
-            legend: {
-                data: []
-            },
-            xAxis: {
-                data: []
-            },
-            yAxis: {},
-            dataZoom: [
-                {
-                    type: 'slider',
-                    start: 0,
-                    end: 100
-                },
-                {
-                    type: 'inside',
-                    start: 0,
-                    end: 100
-                }
-            ],
-            series: []
-        },
-        pickerOptions: {
-          shortcuts: [{
-            text: '半小时内',
-            onClick(picker) {
-              const end = new Data();
-              const start = new Date();
-              start.setTime(start.getTime() - 1800 * 1000);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '一天内',
-            onClick(picker) {
-              const end = new Data();
-              const start = new Data();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近一周',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近一个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近三个月',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit('pick', [start, end]);
-            }
-          }]
-        }
+  el:"#form",
+  data:{
+    appending: false,
+    inputs:{
+      table: "",
+      sum: "",
+      count: true,
+      datetimerange: [],
+      period: 1,
+      group: '',
+      where_f: [],
+      where_v: [],
     },
-    created: function(){
-        $.getJSON({
-            url: '/?getConfig=1',
-            success: (data)=>{
-                this.config = data
-            }
-        })
+    autoRequest: false,
+    autoRequestId: 0,
+    config: {
+      logFormatAs: []
     },
-    methods: {
-        example: function(){
-            this.inputs.table = '%admin%'
-            console.log(this.inputs.datetimerange)
-            let stime = new Date()
-            stime.setTime(1471903200000)
-            let etime = new Date()
-            etime.setTime(1471939200000)
-            this.inputs.datetimerange = [stime,etime]
-            this.inputs.where_f.push('url_query.id')
-            this.inputs.where_v.push('1234')
+    chartOption: {
+      title: "",
+      tooltip: {},
+      legend: {
+        data: []
+      },
+      xAxis: {
+          data: []
+      },
+      yAxis: {},
+      dataZoom: [
+        {
+          type: 'slider',
+          start: 0,
+          end: 100
         },
-        submit: function(){
-            this.appending = true
-            chart.showLoading()
-            let self = this
-            $.getJSON({
-                url: '/',
-                data: this.inputs,
-                success: this.render
-            }).done(function(){
-                chart.hideLoading()
-            })
-        },
-        render: function(data){
-            this.chartOption.xAxis.data = data.xData
-            this.chartOption.legend.data.push(this.inputs.table)
-            this.chartOption.series.push({
-                name: this.inputs.table,
-                type: this.inputs.group ? 'bar' : 'line',
-                data: data.yData
-            })
-            chart.setOption(this.chartOption)
-        },
-        addWhere: function(){
-            this.inputs.where_f.push('')
-            this.inputs.where_v.push('')
-        },
-        delWhere: function(index){
-            this.inputs.where_f.splice(index,1)
-            this.inputs.where_v.splice(index,1)
-        },
-        clear: function(){
-          this.chartOption =  {
-              title: "",
-              tooltip: {},
-              legend: {
-                  data: []
-              },
-              xAxis: {
-                  data: []
-              },
-              yAxis: {},
-              dataZoom: [
-                {
-                    type: 'slider',
-                    start: 0,
-                    end: 100
-                },
-                {
-                    type: 'inside',
-                    start: 0,
-                    end: 100
-                }
-              ],
-              series: []
-          }
-          chart.clear()
-          this.inputs = {
-              table: "",
-              sum: "",
-              count: false,
-              datetimerange: "",
-              period: 1,
-              group: '',
-              where_f: [],
-              where_v: [],
-          }
-          this.appending = false
+        {
+          type: 'inside',
+          start: 0,
+          end: 100
         }
+      ],
+      series: []
+    },
+    inputsLog: [],
+    pickerOptions: {
+      shortcuts: [{
+        text: '半小时内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Date();
+          start.setTime(start.getTime() - 1800 * 1000);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '一天内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Data();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一周',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近三个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+          picker.$emit('pick', [start, end]);
+        }
+      }]
     }
+  },
+  created: function(){
+    $.getJSON({
+      url: '/?getConfig=1',
+      success: (data)=>{
+        this.config = data
+      }
+    })
+  },
+  watch: {
+    autoRequest: function(val, oldVal){
+      if(val && this.inputsLog.length){
+        this.autoRequestId = window.setInterval(function(){
+          let now = new Date()
+          for(let i in this.inputsLog){
+            this.inputsLog[i].datetimerange[1] = now
+            $.getJSON({
+              url: '/',
+              data: this.inputsLog[i],
+              success: this.render
+            })
+          }
+        },5000)
+      }else if(this.autoRequestId){
+        window.clearInterval(this.autoRequestId)
+      }
+    }
+  },
+  methods: {
+    example: function(){
+      this.inputs.table = '%admin%'
+      console.log(this.inputs.datetimerange)
+      let stime = new Date()
+      stime.setTime(1471903200000)
+      let etime = new Date()
+      etime.setTime(1471939200000)
+      this.inputs.datetimerange = [stime,etime]
+      this.inputs.where_f.push('url_query.id')
+      this.inputs.where_v.push('1234')
+    },
+    submit: function(){
+      this.appending = true
+      this.inputsLog.push(JSON.parse(JSON.stringify(this.inputs)))
+      chart.showLoading()
+      let self = this
+      $.getJSON({
+        url: '/',
+        data: this.inputs,
+        success: this.render
+      }).done(function(){
+          chart.hideLoading()
+      })
+    },
+    render: function(data){
+      this.chartOption.xAxis.data = data.xData
+      this.chartOption.legend.data.push(this.inputs.table)
+      this.chartOption.series.push({
+        name: this.inputs.table,
+        type: this.inputs.group ? 'bar' : 'line',
+        data: data.yData
+      })
+      chart.setOption(this.chartOption)
+    },
+    addWhere: function(){
+      this.inputs.where_f.push('')
+      this.inputs.where_v.push('')
+    },
+    delWhere: function(index){
+      this.inputs.where_f.splice(index,1)
+      this.inputs.where_v.splice(index,1)
+    },
+    clear: function(){
+      this.chartOption =  {
+        title: "",
+        tooltip: {},
+        legend: {
+            data: []
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        dataZoom: [
+          {
+            type: 'slider',
+            start: 0,
+            end: 100
+          },
+          {
+            type: 'inside',
+            start: 0,
+            end: 100
+          }
+        ],
+        series: []
+      }
+      chart.clear()
+      this.inputs = {
+        table: "",
+        sum: "",
+        count: false,
+        datetimerange: "",
+        period: 1,
+        group: '',
+        where_f: [],
+        where_v: [],
+      }
+      this.appending = false
+      this.inputsLog = []
+      this.autoRequest = false
+    }
+  }
 })
 </script>
 </body>
