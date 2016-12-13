@@ -10,46 +10,46 @@
       <el-form :inline="true">
       <el-row>
         <el-form-item>
-          <el-tooltip content="点击后忽略'加和'" placement="bottom">
-            <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">计数</el-checkbox>
+          <el-tooltip :content="lang.countDesc" placement="bottom">
+            <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">{{this.lang.count}}</el-checkbox>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="字段名称，得到此字段数值的加和" placement="bottom-start">
-            <el-input placeholder="加和" v-bind:disabled="inputs.count" v-model="inputs.sum"></el-input>
+          <el-tooltip :content="lang.sumDesc" placement="bottom-start">
+            <el-input :placeholder="lang.sum" v-bind:disabled="inputs.count" v-model="inputs.sum"></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="字段名称，对应配置的table，支持前后%模糊匹配" placement="bottom">
-            <el-input placeholder="主索引( * )" v-model="inputs.table"></el-input>
+          <el-tooltip :content="lang.tableDesc" placement="bottom">
+            <el-input :placeholder="lang.table" v-model="inputs.table"></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" placeholder="时间范围（默认1小时内）" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
         </el-form-item>
       </el-row>
       <el-row>
         <el-form-item>
-          <el-tooltip content="结果按时间分组，间隔时间（小时）" placement="bottom">
-            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.group!=''" placeholder="间隔时间(小时)" v-model="inputs.period"></el-input>
+          <el-tooltip :content="lang.periodDesc" placement="bottom">
+            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.group!=''" :placeholder="lang.period" v-model="inputs.period"></el-input>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="结果按字段分组，字段名称，设置后时间分组实效" placement="bottom">
-            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.period!=''" placeholder="分组字段" v-model="inputs.group"></el-input>
+          <el-tooltip :content="lang.groupDesc" placement="bottom">
+            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.period!=''" :placeholder="lang.group" v-model="inputs.group"></el-input>
           </el-tooltip>
         </el-form-item>
       </el-row>
       <el-row style="width:1080px">
           <template class="form-group" v-for="(v,index) in inputs.where_f">
             <el-form-item>
-              <el-tooltip content="字段名称，加上'#>'，'#<'表示数值大小匹配，不加表示精确匹配，url_query 支持用'.'做子查询" placement="bottom">
-                <el-input placeholder="条件" v-model="inputs.where_f[index]"></el-input>
+              <el-tooltip :content="lang.wherefDesc" placement="bottom">
+                <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
               </el-tooltip>
             </el-form-item>
             <el-form-item>
-              <el-tooltip content="字段值" placement="bottom">
-                <el-input placeholder="值" v-model="inputs.where_v[index]"></el-input>
+              <el-tooltip :content="lang.wherevDesc" placement="bottom">
+                <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
               </el-tooltip>
             </el-form-item>
             <el-form-item>
@@ -59,29 +59,29 @@
       </el-row>
       <el-row>
         <el-form-item>
-          <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">添加条件</el-button>
+          <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">{{lang.addWhere}}</el-button>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="清除条件和图标" placement="bottom">
-            <el-button :plain="true" type="warning" v-on:click="clear">还原</el-button>
+          <el-tooltip :content="lang.clearDesc" placement="bottom">
+            <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="添加曲线到图表" placement="bottom">
-            <el-button type="primary" v-on:click="submit">提交</el-button>
+          <el-tooltip :content="lang.submitDesc" placement="bottom">
+            <el-button type="primary" v-on:click="submit">{{lang.submit}}</el-button>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
           <el-switch v-bind:disabled="!appending" v-model="autoRequest">
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="加载例子后点击提交试试。再去掉条件，再点击提交" placement="bottom">
-            <el-button v-on:click="example1">例子1</el-button>
+          <el-tooltip :content="lang.example1Desc" placement="bottom">
+            <el-button v-on:click="example1">{{lang.example1}}</el-button>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
-          <el-tooltip content="不是按时间分组无法增加数据" placement="bottom">
-            <el-button v-on:click="example2">例子2</el-button>
+          <el-tooltip :content="lang.example2Desc" placement="bottom">
+            <el-button v-on:click="example2">{{lang.example2}}</el-button>
           </el-tooltip>
         </el-form-item>
       </el-row>
@@ -95,6 +95,7 @@
 <script src="view/js/vue.min.js"></script>
 <script src="view/js/element-ui.min.js"></script>
 <script src="view/js/echarts.min.js"></script>
+<script src="view/js/lang/lang-zh_CN.js"></script>
 <script>
 var chart = echarts.init(document.getElementById('chart'))
 
@@ -184,7 +185,8 @@ new Vue({
           picker.$emit('pick', [start, end]);
         }
       }]
-    }
+    },
+    lang: lang
   },
   created: function(){
     $.getJSON({
