@@ -1,6 +1,6 @@
 {
   "dataDir": "data",
-  "logFormat": '%str,? ?%str %str %str [%string] "%str %url_path%url_query %str" %number %number "%str" "%string"',
+  "logFormat": "%str,? ?%str %str %str [%string] \"%str %url_path%url_query %str\" %number %number \"%str\" \"%string\"",
   "logFormatAs": [
     "client_ip",
     "x_forward_ip",
@@ -19,7 +19,7 @@
   "table": "url_path",
   "time": "time",
   "url_query": "url_query",
-  "timezone": 'Asia/Shanghai',
+  "timezone": "Asia/Shanghai",
   "collector": {
     "log_file": "nginx_access.log",
     "collector_id": 1,

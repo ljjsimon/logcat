@@ -222,6 +222,9 @@ class Log{
         $whereSign = $this->whereSign;
         foreach($where as $field=>$value){
             $sign = isset($whereSign[$field]) ? $whereSign[$field] : '=';
+            if(!isset($match[$field])){
+                return false;
+            }
             $_value = $match[$field];
             if($sign == '<' && $_value >= $value){
                 return false;
@@ -233,6 +236,13 @@ class Log{
                 return false;
             }elseif($sign == '=' && $_value !== $value){
                 return false;
+            }elseif($sign == 'like'){
+                extract($this->prepareLike($value));//$string,$start,$end
+                $value = $string;
+                $len = strlen($table);
+                if(!$this->matchLike($_value,$value,$start,$end,$len)){
+                    return false;
+                }
             }
         }
         return true;
@@ -251,23 +261,13 @@ class Log{
         }
 
         $pos = [];
-        $start = true; //前面严格匹配
-        $end = true; //后面严格匹配
-        $len = strlen($table);
-        if($table[$len-1] == '%'){
-            $end = false;
-            $table = substr($table,0,$len-1);
-        }
-        if($table[0] == '%'){
-            $start = false;
-            $table = substr($table,1,strlen($table));
-        }
+        extract($this->prepareLike($table));//$string,$start,$end
+        $table = $string;
         $len = strlen($table);
 
         $fp = fopen($indexFile,'r');
         foreach($tables as $_table=>$ipos){
-            $i = strpos($_table,$table);
-            if($i === false || ($start && $i!=0) || ($end && (strlen($_table)-$i)!=$len)){
+            if(!$this->matchLike($_table,$table,$start,$end,$len)){
                 continue;
             }
             fseek($fp,$ipos[0]);
@@ -276,6 +276,26 @@ class Log{
         }
         fclose($fp);
         return $pos;
+    }
+    
+    private function prepareLike($string){
+        $start = true; //前面严格匹配
+        $end = true; //后面严格匹配
+        $len = strlen($string);
+        if($string[$len-1] == '%'){
+            $end = false;
+            $string = substr($string,0,$len-1);
+        }
+        if($string[0] == '%'){
+            $start = false;
+            $string = substr($string,1,strlen($string));
+        }
+        return compact('string','start','end');
+    }
+    
+    private function matchLike($string,$str,$start,$end,$len){
+        $i = strpos($string,$str);
+        return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
 
     private function prepareQuery(){
