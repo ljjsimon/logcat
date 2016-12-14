@@ -1,8 +1,8 @@
 <?php
 class Log{
-    private $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
-    private $sum,$count,$table,$where,$whereSign,$group;
-    private $stime,$etime,$period;
+    protected $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
+    protected $sum,$count,$table,$where,$whereSign,$group;
+    protected $stime,$etime,$period;
 
     public function makeIndex($config){
         $this->config = $config;
@@ -319,13 +319,8 @@ class Log{
     }
 
     protected function beforeGet(){
-        $group = $this->group;
-        $stime = $this->stime;
-        $etime = $this->etime;
-        $period = $this->period;
-
-        if(!$group){
-            $periodArr = $this->getPeriodArr($stime,$etime,$period);
+        if(!$this->group){
+            $periodArr = $this->getPeriodArr($this->stime,$this->etime,$this->period);
             $dataArr = array_fill(0,count($periodArr),0);
             $this->periodArr = $periodArr;
         }else{

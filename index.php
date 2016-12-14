@@ -12,7 +12,7 @@ include "lib/Log.php";
 if(isset($_GET['p']) && isset($config['plugin'][$_GET['p']])){
     $p = $_GET['p'];
     include $config['plugin'][$p];
-    $class = unfirst($p);
+    $class = ucfirst($p);
     $log = new $class;
 }else{
     $log = new Log;
