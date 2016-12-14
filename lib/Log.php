@@ -55,7 +55,7 @@ class Log{
         $this->writeErrorLog();
     }
 
-    private function writeErrorLog(){
+    protected function writeErrorLog(){
         if(empty($this->errorLog)){
             return;
         }
@@ -65,7 +65,7 @@ class Log{
     /*
      * make index for files by table
      */
-    private function _makeIndex($file,$logFormat,$tablePos,$timePos){
+    protected function _makeIndex($file,$logFormat,$tablePos,$timePos){
         $stime = 0;
         $etime = 0;
         $index = [];
@@ -119,7 +119,7 @@ class Log{
     /*
      * make index for files by time
      */
-    private function getMainIndex(&$mainIndexChanged){
+    protected function getMainIndex(&$mainIndexChanged){
         $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
         if(!file_exists($fileName)){
             return [];
@@ -134,7 +134,7 @@ class Log{
         return $mainIndex;
     }
     
-    private function saveMainIndex($mainIndex){
+    protected function saveMainIndex($mainIndex){
         $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
         file_put_contents($fileName, json_encode($mainIndex));
     }
@@ -182,7 +182,7 @@ class Log{
         $this->$name = $val;
     }
 
-    private function getLogFiles($stime,$etime){
+    protected function getLogFiles($stime,$etime){
         $logFiles = [];
         foreach($this->mainIndex as $file=>$fileIndex){
             if($etime >= $fileIndex['stime'] && $stime <= $fileIndex['etime']){
@@ -192,7 +192,7 @@ class Log{
         return $logFiles;
     }
     
-    private function buildFields($log){
+    protected function buildFields($log){
         preg_match($this->logFormat, $log, $match);
         if(!$match){
             return $fields;
@@ -217,7 +217,7 @@ class Log{
         return $fields;
     }
 
-    private function filterWhere(&$match){
+    protected function filterWhere(&$match){
         $where = $this->where;
         $whereSign = $this->whereSign;
         foreach($where as $field=>$value){
@@ -253,7 +253,7 @@ class Log{
      * @tables 日志文件包含的所有table
      * @table 要查找的table
      */
-    private function getPos($indexFile,$tables,$table){
+    protected function getPos($indexFile,$tables,$table){
         if($table == '*'){
             $pos = unpack('I*',file_get_contents($indexFile));
             sort($pos);
@@ -278,7 +278,7 @@ class Log{
         return $pos;
     }
     
-    private function prepareLike($string){
+    protected function prepareLike($string){
         $start = true; //前面严格匹配
         $end = true; //后面严格匹配
         $len = strlen($string);
@@ -293,12 +293,12 @@ class Log{
         return compact('string','start','end');
     }
     
-    private function matchLike($string,$str,$start,$end,$len){
+    protected function matchLike($string,$str,$start,$end,$len){
         $i = strpos($string,$str);
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
 
-    private function prepareQuery(){
+    protected function prepareQuery(){
         !$this->etime && $this->etime = time();
         !$this->stime && $this->stime = $this->etime - 3600;
         !$this->period && $this->period = 3600;
@@ -310,7 +310,7 @@ class Log{
     /*
      * 得到时间区间数组
      */
-    private function getPeriodArr($stime,$etime,$period){
+    protected function getPeriodArr($stime,$etime,$period){
         $periodArr = [];
         for($i=$stime+$period; $i<=$etime; $i+=$period){
             $periodArr[] = $i;
@@ -383,7 +383,7 @@ class Log{
         ];
     }
     
-    public function writeLog($file,$log){
+    protected function writeLog($file,$log){
         if($log===''){
             return;
         }

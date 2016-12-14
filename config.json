@@ -27,5 +27,8 @@
   },
   "collector_log_file": {
     "1": "nginx1/nginx_access.log"
+  },
+  "plugin":{
+    "map": "plugin/logcat_map/index.php"
   }
 }
