@@ -35,9 +35,9 @@ I advise test before put whole log file in data/, by puting one line of logs in 
 
 ##Collect log
 If you can't put log files in data/, or there are more than one log source, you need log collectiong.  
-Copying whole program to the machine making log files. Change configure in configure.php, and then do
+Copying whole program to the machine making log files. Change configure in config.json, and then do
 ```shell
-php sender.php &
+php collector.php &
 ```
 Logcat will collect log automatically.
 

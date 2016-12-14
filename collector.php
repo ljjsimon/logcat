@@ -1,21 +1,21 @@
 <?php
 $config = json_decode(file_get_contents('config.json'),true);
-if(!isset($config['sender'])){
-    die('wrong sender config');
+if(!isset($config['collector'])){
+    die('wrong collector config');
 }
 set_time_limit(0);
-extract($config['sender']);//$log_file, $sender_id, $server_addr
+extract($config['collector']);//$log_file, $collector_id, $server_addr
 $pos = 0;
-if(is_file('sender_log_pos')){
-    $str = file_get_contents('sender_log_pos');
+if(is_file('collector_log_pos')){
+    $str = file_get_contents('collector_log_pos');
     is_numeric($str) && $pos = $str;
 }
 
-function send($server_addr,$sender_id,$log){
+function send($server_addr,$collector_id,$log){
     $ch = curl_init();
     curl_setopt($ch,CURLOPT_URL,$server_addr);
     curl_setopt($ch,CURLOPT_POST,1);
-    curl_setopt($ch,CURLOPT_POSTFIELDS,compact('sender_id','log'));
+    curl_setopt($ch,CURLOPT_POSTFIELDS,compact('collector_id','log'));
     $output = curl_exec($ch);
     curl_close($ch);
     return $output;
@@ -39,8 +39,8 @@ while(1){
     fclose($fp);
     echo $log;
     if($log!==''){
-        send($server_addr,$sender_id,$log);
+        send($server_addr,$collector_id,$log);
         $log = '';
     }
-    file_put_contents('sender_log_pos',$pos);
+    file_put_contents('collector_log_pos',$pos);
 }

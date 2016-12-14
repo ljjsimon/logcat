@@ -7,12 +7,12 @@ if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
 set_time_limit(0);
 include "lib/Log.php";
 require "lib/config.php"; //$sysConfig
-require "config.php"; //$config
+$config = json_decode(file_get_contents('config.json'),true);
 use lib\Log;
 $log = new Log;
 
-if(isset($_POST['sender_id']) && isset($_POST['log']) && isset($config['sender_log_file'][$_POST['sender_id']])){
-    $log->writeLog($config['dataDir'].'/'.$config['sender_log_file'][$_POST['sender_id']],$_POST['log']);
+if(isset($_POST['collector_id']) && isset($_POST['log']) && isset($config['collector_log_file'][$_POST['collector_id']])){
+    $log->writeLog($config['dataDir'].'/'.$config['collector_log_file'][$_POST['collector_id']],$_POST['log']);
     exit;
 }
 
