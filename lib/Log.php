@@ -320,20 +320,28 @@ class Log{
 
     protected function beforeGet(){
         $group = $this->group;
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $period = $this->period;
+
         if(!$group){
-            $this->periodArr = $this->getPeriodArr($stime,$etime,$period);
+            $periodArr = $this->getPeriodArr($stime,$etime,$period);
             $dataArr = array_fill(0,count($periodArr),0);
+            $this->periodArr = $periodArr;
         }else{
             $dataArr = [];
         }
         $this->dataArr = $dataArr;
     }
     
-    protected function getLine($fields){
+    protected function getFields($fields){
         $group = $this->group;
         $stime = $this->stime;
         $period = $this->period;
         $time = $fields[$this->config['time']];
+        if(!is_numeric($time)){
+            $time = strtotime($time);
+        }
         
         $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
         if($this->count){
@@ -343,7 +351,7 @@ class Log{
             $value = $fields[$this->sum];
         }
 
-        if(isset($dataArr[$key])){
+        if(isset($this->dataArr[$key])){
             $this->dataArr[$key] += $value;
         }else{
             $this->dataArr[$key] = $value;

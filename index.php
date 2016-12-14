@@ -9,10 +9,10 @@ require "lib/config.php"; //$sysConfig
 $config = json_decode(file_get_contents('config.json'),true);
 
 include "lib/Log.php";
-if(isset($_GET['p']) && isset($config['plugin'][$_GET['p'])){
+if(isset($_GET['p']) && isset($config['plugin'][$_GET['p']])){
     $p = $_GET['p'];
     include $config['plugin'][$p];
-    $class = unfirst($p)
+    $class = unfirst($p);
     $log = new $class;
 }else{
     $log = new Log;
