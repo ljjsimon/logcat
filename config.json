@@ -1,0 +1,31 @@
+{
+  "dataDir": "data",
+  "logFormat": '%str,? ?%str %str %str [%string] "%str %url_path%url_query %str" %number %number "%str" "%string"',
+  "logFormatAs": [
+    "client_ip",
+    "x_forward_ip",
+    "host",
+    "server_ip",
+    "time",
+    "method",
+    "url_path",
+    "url_query",
+    "http_protocol",
+    "http_status",
+    "body_bytes_sent",
+    "http_referer",
+    "http_user_agent"
+  ],
+  "table": "url_path",
+  "time": "time",
+  "url_query": "url_query",
+  "timezone": 'Asia/Shanghai',
+  "collector": {
+    "log_file": "nginx_access.log",
+    "collector_id": 1,
+    "server_addr": "http://localhot:8080"
+  },
+  "collector_log_file": {
+    "1": "nginx1/nginx_access.log"
+  }
+}
