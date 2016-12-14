@@ -5,11 +5,18 @@ if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
 }
 
 set_time_limit(0);
-include "lib/Log.php";
 require "lib/config.php"; //$sysConfig
 $config = json_decode(file_get_contents('config.json'),true);
-use lib\Log;
-$log = new Log;
+
+include "lib/Log.php";
+if(isset($_GET['p']) && isset($config['plugin'][$_GET['p'])){
+    $p = $_GET['p'];
+    include $config['plugin'][$p];
+    $class = unfirst($p)
+    $log = new $class;
+}else{
+    $log = new Log;
+}
 
 if(isset($_POST['collector_id']) && isset($_POST['log']) && isset($config['collector_log_file'][$_POST['collector_id']])){
     $log->writeLog($config['dataDir'].'/'.$config['collector_log_file'][$_POST['collector_id']],$_POST['log']);
@@ -19,7 +26,6 @@ if(isset($_POST['collector_id']) && isset($_POST['log']) && isset($config['colle
 $config = array_merge($sysConfig,$config);
 date_default_timezone_set($config['timezone']);
 $log->makeIndex($config);
-
 
 isset($_GET['sum']) && $log->sum = $_GET['sum'];
 isset($_GET['count']) && $_GET['count']!='false' && $log->count = $_GET['count'];
@@ -33,13 +39,7 @@ if(isset($_GET['where_f']) && isset($_GET['where_v'])){
     $log->where = array_combine($_GET['where_f'], $_GET['where_v']);
 }
 
-if(isset($_GET['p']) && isset($config['plugin'][$_GET['p'])){
-    $p = $_GET['p'];
-    include $config['plugin'][$p];
-    $class = unfirst($p)
-    $obj = new $class;
-    $obj->get();
-}elseif(isset($_GET['getConfig'])){
+if(isset($_GET['getConfig'])){
     echo json_encode($config);
 }elseif($_GET){
     $data = $log->get();

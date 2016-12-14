@@ -29,6 +29,6 @@
     "1": "nginx1/nginx_access.log"
   },
   "plugin":{
-    "map": "plugin/logcat_map/index.php"
+    "map": "plugin/logcat_map/map.php"
   }
 }

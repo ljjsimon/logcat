@@ -1,5 +1,4 @@
 <?php
-namespace lib;
 class Log{
     private $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
     private $sum,$count,$table,$where,$whereSign,$group;
@@ -319,6 +318,47 @@ class Log{
         return $periodArr;
     }
 
+    protected function beforeGet(){
+        $group = $this->group;
+        if(!$group){
+            $this->periodArr = $this->getPeriodArr($stime,$etime,$period);
+            $dataArr = array_fill(0,count($periodArr),0);
+        }else{
+            $dataArr = [];
+        }
+        $this->dataArr = $dataArr;
+    }
+    
+    protected function getLine($fields){
+        $group = $this->group;
+        $stime = $this->stime;
+        $period = $this->period;
+        $time = $fields[$this->config['time']];
+        
+        $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
+        if($this->count){
+            $value = 1;
+        }
+        elseif($this->sum){
+            $value = $fields[$this->sum];
+        }
+
+        if(isset($dataArr[$key])){
+            $this->dataArr[$key] += $value;
+        }else{
+            $this->dataArr[$key] = $value;
+        }
+    }
+    
+    protected function got(){
+        $xData = $group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
+
+        return [
+            'xData' => $xData,
+            'yData' => array_values($this->dataArr)
+        ];
+    }
+    
     public function get(){
         $this->prepareQuery();
         $stime = $this->stime;
@@ -327,13 +367,7 @@ class Log{
         $table = $this->table;
         $fieldPos = $this->fieldPos;
         $logFiles = $this->getLogFiles($stime,$etime);
-        $group = $this->group;
-        if(!$group){
-            $periodArr = $this->getPeriodArr($stime,$etime,$period);
-            $dataArr = array_fill(0,count($periodArr),0);
-        }else{
-            $dataArr = [];
-        }
+        $this->beforeGet();
 
         foreach($logFiles as $file=>$tables){
             if(!is_file($file)){
@@ -357,30 +391,12 @@ class Log{
                     continue;
                 }
 
-                $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
-                if($this->count){
-                    $value = 1;
-                }
-                elseif($this->sum){
-                    $value = $fields[$this->sum];
-                }
-
-                if(isset($dataArr[$key])){
-                    $dataArr[$key] += $value;
-                }else{
-                    $dataArr[$key] = $value;
-                }
-
+                $this->getFields($fields);
             }
             fclose($logFp);
         }
 
-        $xData = $group ? array_keys($dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $periodArr);
-
-        return [
-            'xData' => $xData,
-            'yData' => array_values($dataArr)
-        ];
+        return $this->got();
     }
     
     protected function writeLog($file,$log){
