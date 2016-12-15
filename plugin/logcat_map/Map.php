@@ -2,15 +2,17 @@
 include "IP.class.php";
 class Map extends Log{
     protected function beforeGet(){
+        $this->ip = $_GET['ip'];
         $this->dataArr = [];
         $this->ips = [];
     }
     
     protected function getFields($fields){
-        $ip = $fields['client_ip'];
-        if(in_array($ip,$this->ips)){
+        $ip = $fields[$this->ip];
+        if(!filter_var($ip,FILTER_VALIDATE_IP) || in_array($ip,$this->ips)){
             return;
         }
+        $this->ips[] = $ip;
         $addr = IP::find($ip);
         if(!$addr[1]){
             return;
@@ -35,6 +37,6 @@ class Map extends Log{
     }
 
     public function getHtml(){
-        return file_get_contents('index.html');
+        return file_get_contents(dirname(__FILE__).'/index.html');
     }
 }

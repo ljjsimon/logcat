@@ -13,9 +13,11 @@ if(isset($_GET['p']) && isset($config['plugin'][$_GET['p']])){
     $p = $_GET['p'];
     include $config['plugin'][$p];
     $class = ucfirst($p);
-    $log = new $class;
+    $log = new $class($config);
+    $p=$_GET['p'];
+    unset($_GET['p']);
 }else{
-    $log = new Log;
+    $log = new Log($config);
 }
 
 //write log from collectors
@@ -36,8 +38,7 @@ if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
 }
 
 //make index
-$log->makeIndex($config);
-
+$log->makeIndex();
 //echo data
 if($_GET){
     $data = $log->get();

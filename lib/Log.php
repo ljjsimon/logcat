@@ -3,9 +3,13 @@ class Log{
     protected $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
     protected $sum,$count,$distinct,$table,$where,$whereSign,$group;
     protected $stime,$etime,$period;
-
-    public function makeIndex($config){
+    
+    public function __construct($config){
         $this->config = $config;
+    }
+
+    public function makeIndex(){
+        $config = $this->config;
         $logFormat = str_replace(array_keys($config['formatReg']),array_values($config['formatReg']),$config['logFormat']);
         $logFormat = "/".$logFormat."/i";
         $this->logFormat = $logFormat;
@@ -17,7 +21,7 @@ class Log{
         $mainIndexChanged = false;
         $mainIndex = $this->getMainIndex($mainIndexChanged);
         //一级目录
-        $dir = $config['rootPath'].$config['dataDir'];
+        $dir = $config['rootPath'].'/'.$config['dataDir'];
         $_dh = opendir($dir);
         
         while(($_dir = readdir($_dh)) !== false){
@@ -134,7 +138,7 @@ class Log{
     }
     
     protected function saveMainIndex($mainIndex){
-        $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
+        $fileName = $this->config['rootPath'].'/'.$this->config['dataDir'].'/main.index';
         file_put_contents($fileName, json_encode($mainIndex));
     }
 
@@ -296,6 +300,21 @@ class Log{
         $i = strpos($string,$str);
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
+    
+    protected function filterInput(){
+        isset($_GET['sum']) && $this->__set('sum', $_GET['sum']);
+        isset($_GET['count']) && $_GET['count']!='false' && $this->__set('count', $_GET['count']);
+        isset($_GET['distinct']) && $this->__set('distinct', $_GET['distinct']);
+        isset($_GET['table']) && $this->__set('table', $_GET['table']);
+        isset($_GET['period']) && $this->__set('period',$_GET['period']);
+        isset($_GET['stime']) && $this->__set('stime', $_GET['stime']);
+        isset($_GET['etime']) && $this->__set('etime', $_GET['etime']);
+        isset($_GET['datetimerange']) && $this->__set('datetimerange', $_GET['datetimerange']);
+        isset($_GET['group']) && $this->__set('group', $_GET['group']);
+        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
+            $this->__set('where', array_combine($_GET['where_f'], $_GET['where_v']));
+        }
+    }
 
     protected function prepareQuery(){
         !$this->etime && $this->etime = time();
@@ -319,19 +338,6 @@ class Log{
     }
 
     protected function beforeGet(){
-        isset($_GET['sum']) && $this->sum = $_GET['sum'];
-        isset($_GET['count']) && $_GET['count']!='false' && $this->count = $_GET['count'];
-        isset($_GET['distinct']) && $this->distinct = $_GET['distinct'];
-        isset($_GET['table']) && $this->table = $_GET['table'];
-        isset($_GET['period']) && $this->period = $_GET['period'];
-        isset($_GET['stime']) && $this->stime = $_GET['stime'];
-        isset($_GET['etime']) && $this->etime = $_GET['etime'];
-        isset($_GET['datetimerange']) && $this->datetimerange = $_GET['datetimerange'];
-        isset($_GET['group']) && $this->group = $_GET['group'];
-        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
-            $this->where = array_combine($_GET['where_f'], $_GET['where_v']);
-        }
-        
         if(!$this->group){
             $periodArr = $this->getPeriodArr($this->stime,$this->etime,$this->period);
             $dataArr = array_fill(0,count($periodArr),0);
@@ -380,7 +386,7 @@ class Log{
     }
     
     protected function got(){
-        $xData = $group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
+        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
 
         return [
             'xData' => $xData,
@@ -389,8 +395,9 @@ class Log{
     }
     
     public function get(){
-        $this->beforeGet();
+        $this->filterInput();
         $this->prepareQuery();
+        $this->beforeGet();
         $stime = $this->stime;
         $etime = $this->etime;
         $table = $this->table;
@@ -434,6 +441,6 @@ class Log{
     }
     
     public function getHtml(){
-        return file_get_contents($config['rootPath'].'/view/index.html');
+        return file_get_contents($this->config['rootPath'].'/view/index.html');
     }
 }

@@ -1,8 +1,7 @@
 {
   "dataDir": "data",
-  "logFormat": "%str,? ?%str %str %str [%string] \"%str %url_path%url_query %str\" %number %number \"%str\" \"%string\"",
+  "logFormat": "%string %str %str [%string] \"%str %url_path%url_query %str\" %number %number \"%str\" \"%string\"",
   "logFormatAs": [
-    "client_ip",
     "x_forward_ip",
     "host",
     "server_ip",

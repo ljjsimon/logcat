@@ -1,0 +1,236 @@
+  <div class="container" style="width:1280px;matgin-right:auto;margin-left:auto;">
+    <div id="form">
+      <el-form :inline="true">
+      <el-row>
+        <el-form-item>
+          <el-tooltip content="ip 对应字段" placement="bottom">
+            <el-input placeholder="ip" v-model="inputs.ip"></el-input>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.tableDesc" placement="bottom">
+            <el-input :placeholder="lang.table" v-model="inputs.table"></el-input>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+        </el-form-item>
+      </el-row>
+      <el-row>
+        <el-form-item>
+          <el-tooltip :content="lang.periodDesc" placement="bottom">
+            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.group!=''" :placeholder="lang.period" v-model="inputs.period"></el-input>
+          </el-tooltip>
+        </el-form-item>
+      </el-row>
+      <el-row style="width:1080px">
+          <template class="form-group" v-for="(v,index) in inputs.where_f">
+            <el-form-item>
+              <el-tooltip :content="lang.wherefDesc" placement="bottom">
+                <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item>
+              <el-tooltip :content="lang.wherevDesc" placement="bottom">
+                <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item>
+              <el-button v-on:click="delWhere(index)" icon="close"></el-button>
+            </el-form-item>
+          </template>
+      </el-row>
+      <el-row>
+        <el-form-item>
+          <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">{{lang.addWhere}}</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.clearDesc" placement="bottom">
+            <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.submitDesc" placement="bottom">
+            <el-button type="primary" v-on:click="submit">{{lang.submit}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-switch v-bind:disabled="!appending" v-model="autoRequest">
+        </el-form-item>
+      </el-row>
+      </el-form>
+    </div>
+    <div class="row">
+      <div id="chart" style="width: 1080px;height:400px;"></div>
+    </div>
+  </div>
+<script src="view/js/map/china.js"></script>
+<script src="view/js/lang/lang-zh_CN.js"></script>
+<script>
+var chart = echarts.init(document.getElementById('chart'))
+
+new Vue({
+  el:"#form",
+  data:{
+    appending: false,
+    inputs:{
+      table: "",
+      ip: "",
+      datetimerange: [],
+      period: 24,
+      where_f: [],
+      where_v: [],
+      p: 'map'
+    },
+    autoRequest: false,
+    autoRequestId: 0,
+    config: {
+      logFormatAs: []
+    },
+    chartOption: {
+      title: "",
+      tooltip: {},
+      legend: {
+        data: []
+      },
+      xAxis: {
+          data: []
+      },
+      yAxis: {},
+      series: []
+    },
+    inputsLog: [],
+    pickerOptions: {
+      shortcuts: [{
+        text: '半小时内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Date();
+          start.setTime(start.getTime() - 1800 * 1000);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '一天内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Data();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一周',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近三个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+          picker.$emit('pick', [start, end]);
+        }
+      }]
+    },
+    lang: lang
+  },
+  created: function(){
+    $.getJSON({
+      url: '/?getConfig=1',
+      success: (data)=>{
+        this.config = data
+      }
+    })
+  },
+  watch: {
+    autoRequest: function(val, oldVal){
+      if(val && this.inputsLog.length){
+        let self = this
+        this.autoRequestId = window.setInterval(function(){
+          let now = new Date()
+          for(var i in self.inputsLog){
+            self.inputsLog[i].datetimerange[1] = now
+            $.getJSON({
+              url: '/',
+              data: self.inputsLog[i],
+              success: self.render
+            })
+          }
+        },5000)
+      }else if(this.autoRequestId){
+        window.clearInterval(this.autoRequestId)
+      }
+    }
+  },
+  methods: {
+    submit: function(){
+      this.appending = true
+      this.inputsLog.push(JSON.parse(JSON.stringify(this.inputs)))
+      chart.showLoading()
+      let self = this
+      $.getJSON({
+        url: '/',
+        data: this.inputs,
+        success: this.render
+      }).done(function(){
+          chart.hideLoading()
+      })
+    },
+    render: function(data){
+      this.chartOption.legend.data.push(this.inputs.table)
+      this.chartOption.series.push({
+        name: this.inputs.table,
+        type: 'map',
+        mapType: 'china',
+        data: data
+      })
+      chart.setOption(this.chartOption)
+    },
+    addWhere: function(){
+      this.inputs.where_f.push('')
+      this.inputs.where_v.push('')
+    },
+    delWhere: function(index){
+      this.inputs.where_f.splice(index,1)
+      this.inputs.where_v.splice(index,1)
+    },
+    clear: function(){
+      this.chartOption =  {
+        title: "",
+        tooltip: {},
+        legend: {
+            data: []
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        series: []
+      }
+      chart.clear()
+      this.inputs = {
+        table: "",
+        ip: "",
+        period: 24,
+        where_f: [],
+        where_v: [],
+      }
+      this.appending = false
+      this.inputsLog = []
+      this.autoRequest = false
+      this.autoRequestId = 0
+    }
+  }
+})
+</script>

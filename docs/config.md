@@ -7,7 +7,7 @@
   /* the format of each line of logs
    * escape characters(ESC) begin with '%', see lib/config.php for more definition
    * the logFormat string will be compiled into regular expression finally
-   * if you are not sure one part exists, you can add '?' after it, any other regular expression will be replaced
+   * all regular expression will be replaced
    * 
    * lib/config.php 里提供了其他转义字符，通常建议转义字符越精确越好
    * 但是通常 nginx 会把未获得的地段用'-'替换，因此这里所有字段都用 %str (非空字符串) 定义
