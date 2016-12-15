@@ -1,29 +1,37 @@
 <?php
+include "IP.class.php";
 class Map extends Log{
     protected function beforeGet(){
-        $periodArr = $this->getPeriodArr($this->stime,$this->etime,$this->period);
-        $this->dataArr = array_fill(0,count($periodArr),0);
-        $this->periodArr = $periodArr;
-        $this->lastDataKey = '';
+        $this->dataArr = [];
+        $this->ips = [];
     }
     
     protected function getFields($fields){
-        $time = $fields[$this->config['time']];
         $ip = $fields['client_ip'];
-        if(!is_numeric($time)){
-            $time = strtotime($time);
+        if(in_array($ip,$this->ips)){
+            return;
         }
-        
-        $key = intval(($time - $this->stime)/$this->period);
-        if($key != $this->lastDataKey){
-            $this->lastDataKey = $key;
-            $this->ips = [];
+        $addr = IP::find($ip);
+        if(!$addr[1]){
+            return;
         }
-
-        if(!in_array($ip,$this->ips)){
-            $this->dataArr[$key] += 1;
-            $this->ips[] = $ip;
+        $province = $addr[1];
+        if(isset($this->dataArr[$province])){
+            $this->dataArr[$province]++;
+        }else{
+            $this->dataArr[$province] = 1;
         }
+    }
+    
+    protected function got(){
+        $res = [];
+        foreach($this->dataArr as $province=>$count){
+            $res[] = [
+                'name' => $province,
+                'value' => $count
+            ];
+        }
+        return $res;
     }
 
     public function getHtml(){

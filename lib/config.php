@@ -26,6 +26,5 @@ $sysConfig = [
         "%str" => "(\S+)",
         "%ip" => "(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})",
     ],
-    "rootPath" => dirname(__FILE__).'/../',
     "timezone" => 'Asia/Shanghai'
 ];

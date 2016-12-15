@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="view/css/element-ui.min.css">
-</head>
-<body>
   <div class="container" style="width:1280px;matgin-right:auto;margin-left:auto;">
     <div id="form">
       <el-form :inline="true">
@@ -12,6 +5,11 @@
         <el-form-item>
           <el-tooltip :content="lang.countDesc" placement="bottom">
             <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">{{this.lang.count}}</el-checkbox>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.distinctDesc" placement="bottom">
+            <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.distinct">{{this.lang.distinct}}</el-checkbox>
           </el-tooltip>
         </el-form-item>
         <el-form-item>
@@ -107,9 +105,10 @@ new Vue({
       table: "",
       sum: "",
       count: true,
+      distinct: "",
       datetimerange: [],
       period: 1,
-      group: '',
+      group: "",
       where_f: [],
       where_v: [],
     },
@@ -318,5 +317,3 @@ new Vue({
   }
 })
 </script>
-</body>
-</html>

@@ -1,7 +1,7 @@
 <?php
 class Log{
     protected $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
-    protected $sum,$count,$table,$where,$whereSign,$group;
+    protected $sum,$count,$distinct,$table,$where,$whereSign,$group;
     protected $stime,$etime,$period;
 
     public function makeIndex($config){
@@ -319,12 +319,29 @@ class Log{
     }
 
     protected function beforeGet(){
+        isset($_GET['sum']) && $this->sum = $_GET['sum'];
+        isset($_GET['count']) && $_GET['count']!='false' && $this->count = $_GET['count'];
+        isset($_GET['distinct']) && $this->distinct = $_GET['distinct'];
+        isset($_GET['table']) && $this->table = $_GET['table'];
+        isset($_GET['period']) && $this->period = $_GET['period'];
+        isset($_GET['stime']) && $this->stime = $_GET['stime'];
+        isset($_GET['etime']) && $this->etime = $_GET['etime'];
+        isset($_GET['datetimerange']) && $this->datetimerange = $_GET['datetimerange'];
+        isset($_GET['group']) && $this->group = $_GET['group'];
+        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
+            $this->where = array_combine($_GET['where_f'], $_GET['where_v']);
+        }
+        
         if(!$this->group){
             $periodArr = $this->getPeriodArr($this->stime,$this->etime,$this->period);
             $dataArr = array_fill(0,count($periodArr),0);
             $this->periodArr = $periodArr;
         }else{
             $dataArr = [];
+        }
+        
+        if($this->distinct){
+            $this->lastDataKey = '';
         }
         $this->dataArr = $dataArr;
     }
@@ -341,9 +358,18 @@ class Log{
         $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
         if($this->count){
             $value = 1;
-        }
-        elseif($this->sum){
+        }elseif($this->sum){
             $value = $fields[$this->sum];
+        }elseif($this->distinct){
+            $value = $fields[$this->distinct];
+            if($key != $this->lastDataKey){
+                $this->lastDataKey = $key;
+                $this->distinctArr = [];
+            }
+            if(!in_array($value,$this->distinctArr)){
+                $this->dataArr[$key] += 1;
+                $this->distinctArr[] = $value;
+            }
         }
 
         if(isset($this->dataArr[$key])){
@@ -363,14 +389,12 @@ class Log{
     }
     
     public function get(){
+        $this->beforeGet();
         $this->prepareQuery();
         $stime = $this->stime;
         $etime = $this->etime;
-        $period = $this->period;
         $table = $this->table;
-        $fieldPos = $this->fieldPos;
         $logFiles = $this->getLogFiles($stime,$etime);
-        $this->beforeGet();
 
         foreach($logFiles as $file=>$tables){
             if(!is_file($file)){
@@ -407,5 +431,9 @@ class Log{
             return;
         }
         file_put_contents($file,$log,FILE_APPEND);
+    }
+    
+    public function getHtml(){
+        return file_get_contents($config['rootPath'].'/view/index.html');
     }
 }

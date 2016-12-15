@@ -1,6 +1,8 @@
 var lang = {
     "count": "计数",
     "countDesc": "选择后忽略'加和'",
+    "distinct": "去重计算",
+    "distinct": "计算此字段第一次出现的次数",
     "sum": "加和",
     "sumDesc": "字段名称，得到此字段数值的加和",
     "table": "主索引( * )",
