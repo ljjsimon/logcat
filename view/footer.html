@@ -12,9 +12,14 @@
     },
     created: function(){
       let self = this
-      $.getJSON('/?getConfig=1',function (data){
+      $.getJSON(window.location,{getConfig:1},function (data){
         self.config = data
       })
+    },
+    methods: {
+      select: function(key, keyPath){
+        window.location='/?p='+key
+      }
     }
   })
 </script>

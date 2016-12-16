@@ -15,10 +15,9 @@
   <div class="el-row" style="margin-left: -10px; margin-right:-10px">
     <div id="sideMenu">
     <el-col span="4">
-      <el-menu>
-        <el-menu-item v-for="(item,name) in config.plugin" :index="name">
-          <a :href="'/?p='+name">{{item.title}}</a>
-        </el-menu-item>
+      <el-menu :default-active="config.p" v-on:select="select">
+        <el-menu-item index="">首页</el-menu-item>
+        <el-menu-item v-for="(item,name) in config.plugin" :index="name">{{item.title}}</el-menu-item>
       </el-menu>
     </el-col>
     </div>

@@ -19,6 +19,7 @@
   "time": "time",
   "url_query": "url_query",
   "timezone": "Asia/Shanghai",
+  "lang": "zh-CN",
   "collector": {
     "log_file": "nginx_access.log",
     "collector_id": 1,

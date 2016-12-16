@@ -9,13 +9,12 @@ date_default_timezone_set($config['timezone']);
 
 //init controller
 include "lib/Log.php";
-if(isset($_GET['p']) && isset($config['plugin'][$_GET['p']])){
-    $p = $_GET['p'];
+$p = isset($_GET['p']) ? $_GET['p'] : '';
+unset($_GET['p']);
+if($p && isset($config['plugin'][$p])){
     include $config['plugin'][$p]['file'];
     $class = ucfirst($p);
     $log = new $class($config);
-    $p=$_GET['p'];
-    unset($_GET['p']);
 }else{
     $log = new Log($config);
 }
@@ -27,13 +26,14 @@ if(isset($_POST['collector_id']) && isset($_POST['log']) && isset($config['colle
 }
 
 //echo pages
-$header = file_get_contents('view/header.html');
-$footer = file_get_contents('view/footer.html');
-if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
-    echo $header.$log->getHtml().$footer;
-    exit;
-}elseif(isset($_GET['getConfig'])){
+if(isset($_GET['getConfig'])){
+    $config['p'] = $p;
     echo json_encode($config);
+    exit;
+}elseif(empty($_GET) && empty($_POST)){
+    $header = file_get_contents('view/header.html');
+    $footer = file_get_contents('view/footer.html');
+    echo $header.$log->getHtml().$footer;
     exit;
 }
 
