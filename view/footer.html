@@ -1,24 +1,19 @@
-    </el-col>
-  </el-row>
+    </div>
+    <!--col-->
   </div>
+  <!--row-->
 <script>
   new Vue({
-    el: "#main",
+    el: "#sideMenu",
     data: {
       config: {
-        plugin:{
-            'a':{
-                'title':'aa'
-            }
-        }
+        plugin:{}
       }
     },
     created: function(){
-      $.getJSON({
-        url: '/?getConfig=1',
-        success: function(data){
-          this.config = data
-        }
+      let self = this
+      $.getJSON('/?getConfig=1',function (data){
+        self.config = data
       })
     }
   })

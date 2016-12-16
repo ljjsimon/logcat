@@ -2,7 +2,7 @@ var lang = {
     "count": "count",
     "countDesc": "count",
     "distinct": "distinct",
-    "distinct": "count distinct",
+    "distinctDesc": "count distinct",
     "sum": "sum",
     "sumDesc": "sum",
     "table": "table( * )",

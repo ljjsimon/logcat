@@ -31,10 +31,10 @@ $header = file_get_contents('view/header.html');
 $footer = file_get_contents('view/footer.html');
 if(empty($_GET) && empty($_POST) && php_sapi_name()!='cli'){
     echo $header.$log->getHtml().$footer;
-    flush();
+    exit;
 }elseif(isset($_GET['getConfig'])){
     echo json_encode($config);
-    flush();
+    exit;
 }
 
 //make index

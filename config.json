@@ -27,7 +27,7 @@
   "collector_log_file": {
     "1": "nginx1/nginx_access.log"
   },
-  "plugin":{
+  "plugin": {
     "map": {
       "file": "plugin/logcat_map/map.php",
       "title": "地图"

@@ -9,16 +9,17 @@
 <script src="view/js/echarts.min.js"></script>
 </head>
 <body>
-  <div id="main">
   <el-row>
     <el-menu></el-menu>
   </el-row>
-  <el-row>
-    <el-col :span="8">
+  <div class="el-row" style="margin-left: -10px; margin-right:-10px">
+    <div id="sideMenu">
+    <el-col span="4">
       <el-menu>
         <el-menu-item v-for="(item,name) in config.plugin" :index="name">
           <a href="/?p={{name}}">{{item.title}}</a>
         </el-menu-item>
       </el-menu>
     </el-col>
-    <el-col :span="6">
+    </div>
+    <div class="el-col el-col-20" style="padding-left:10px;padding-right:10px">
