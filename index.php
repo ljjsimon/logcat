@@ -11,7 +11,7 @@ date_default_timezone_set($config['timezone']);
 include "lib/Log.php";
 if(isset($_GET['p']) && isset($config['plugin'][$_GET['p']])){
     $p = $_GET['p'];
-    include $config['plugin'][$p];
+    include $config['plugin'][$p]['file'];
     $class = ucfirst($p);
     $log = new $class($config);
     $p=$_GET['p'];

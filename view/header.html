@@ -17,7 +17,7 @@
     <el-col span="4">
       <el-menu>
         <el-menu-item v-for="(item,name) in config.plugin" :index="name">
-          <a href="/?p={{name}}">{{item.title}}</a>
+          <a :href="'/?p='+name">{{item.title}}</a>
         </el-menu-item>
       </el-menu>
     </el-col>
