@@ -1,2 +1,27 @@
+    </el-col>
+  </el-row>
+  </div>
+<script>
+  new Vue({
+    el: "#main",
+    data: {
+      config: {
+        plugin:{
+            'a':{
+                'title':'aa'
+            }
+        }
+      }
+    },
+    created: function(){
+      $.getJSON({
+        url: '/?getConfig=1',
+        success: function(data){
+          this.config = data
+        }
+      })
+    }
+  })
+</script>
 </body>
 </html>
