@@ -5,14 +5,14 @@ Simple yet powerful log analyser, based on PHP
 
 ##Overview
 Logcat is a log analyzation platform. It's not only for log files, but also for all structed text files.  
-Logcat makes index for all files, and enables you search logs in a way like using SQL( select... from... where ) 
+Logcat makes index for all files, and enables you search logs in a way like using SQL( count(),sum()... from... where ) 
 
 ##Installation
 ```shell
 git clone https://github.com/questionlin/logcat.git
 ```
 Logcat contains a demo data. If you only want to see the demo, skip this part.  
-Change the configure in config.json  
+Change the configuration in config.json  
 [click here](https://github.com/questionlin/logcat/blob/master/docs/config.md) to see the explaination.  
 Put the log files in subfolders in data/  
 It doesn't matter how many subfolders it has.

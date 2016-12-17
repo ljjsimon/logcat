@@ -26,15 +26,17 @@ if(isset($_POST['collector_id']) && isset($_POST['log']) && isset($config['colle
 }
 
 //echo pages
-if(isset($_GET['getConfig'])){
-    $config['p'] = $p;
-    echo json_encode($config);
-    exit;
-}elseif(empty($_GET) && empty($_POST)){
-    $header = file_get_contents('view/header.html');
-    $footer = file_get_contents('view/footer.html');
-    echo $header.$log->getHtml().$footer;
-    exit;
+if(php_sapi_name()!='cli'){
+    if(isset($_GET['getConfig'])){
+        $config['p'] = $p;
+        echo json_encode($config);
+        exit;
+    }elseif(empty($_GET) && empty($_POST)){
+        $header = file_get_contents('view/header.html');
+        $footer = file_get_contents('view/footer.html');
+        echo $header.$log->getHtml().$footer;
+        exit;
+    }
 }
 
 //make index

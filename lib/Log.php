@@ -301,7 +301,7 @@ class Log{
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
     
-    protected function filterInput(){
+    protected function filterInput1(){
         isset($_GET['sum']) && $this->__set('sum', $_GET['sum']);
         isset($_GET['count']) && $_GET['count']!='false' && $this->__set('count', $_GET['count']);
         isset($_GET['distinct']) && $this->__set('distinct', $_GET['distinct']);

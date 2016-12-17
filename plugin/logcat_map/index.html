@@ -19,7 +19,7 @@
       <el-row>
         <el-form-item>
           <el-tooltip :content="lang.periodDesc" placement="bottom">
-            <el-input v-bind:readonly="appending" v-bind:disabled="inputs.group!=''" :placeholder="lang.period" v-model="inputs.period"></el-input>
+            <el-input v-bind:readonly="appending" :placeholder="lang.period" v-model="inputs.period"></el-input>
           </el-tooltip>
         </el-form-item>
       </el-row>
@@ -225,6 +225,7 @@ new Vue({
         period: 24,
         where_f: [],
         where_v: [],
+        p: 'map'
       }
       this.appending = false
       this.inputsLog = []
