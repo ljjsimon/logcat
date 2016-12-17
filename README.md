@@ -13,15 +13,12 @@ git clone https://github.com/questionlin/logcat.git
 ```
 Logcat contains a demo data. If you only want to see the demo, skip this part.  
 Change the configure in config.json  
-[click here](https://github.com/questionlin/logcat/blob/master/config.md) to see the explaination.  
+[click here](https://github.com/questionlin/logcat/blob/master/docs/config.md) to see the explaination.  
 Put the log files in subfolders in data/  
 It doesn't matter how many subfolders it has.
 
-# It may cost some time to make index at the first time.
-php index.php
-
 ##Use
-Type the following code to make index for thr first time. It may cost some time.
+Type the following code to make index for the first time. It may cost some time.
 ```shell
 php index.php
 php -S localhost:8080 index.php &
@@ -42,15 +39,15 @@ I advise to put one line of logs and test before put whole log file in data/.
 
 ##Collect log
 If you can't put log files in data/, or there are more than one log source, you need log collection.  
-Copy whole program to the machine making log files. Change configure in config.json, and then type
+Change configuration in config.json, copy whole program to the machine making log files, and then type
 ```shell
 php collector.php &
 ```
 Logcat will collect log automatically.
 
-##plugin
+##Plugin
 The main part of Logcat concentrates on making index and filter logs, leaves other parts to plugins.  
-[click here](https://github.com/questionlin/logcat/blob/master/plugin.md) to see how to make plugins.
+[click here](https://github.com/questionlin/logcat/blob/master/docs/plugin.md) to see how to make plugins.
 
 ##License
 MIT

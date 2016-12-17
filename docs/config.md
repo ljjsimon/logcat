@@ -1,3 +1,4 @@
+```
 {
   /* main folder of all log files
    * put all log files in subfolders of this folder
@@ -101,3 +102,4 @@
     }
   }
 }
+```
