@@ -17,7 +17,7 @@ Change the configuration in config.json
 Put the log files in subfolders in data/  
 It doesn't matter how many subfolders it has.
 
-##Use
+##Usage
 Type the following code to make index for the first time. It may cost some time.
 ```shell
 php index.php
