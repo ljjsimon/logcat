@@ -395,6 +395,7 @@ class Log{
     }
     
     public function get(){
+        ini_set('memory_limit','1024M');
         $this->filterInput();
         $this->prepareQuery();
         $this->beforeGet();
@@ -410,9 +411,16 @@ class Log{
             
             $posArr = $this->getPos($file.'.index',$tables,$table);
             $logFp = fopen($file,'r');
+            $logs = [];
             foreach($posArr as $pos){
                 fseek($logFp,$pos);
                 $log = fgets($logFp);
+                if($log){
+                    $logs[] = $log;
+                }
+            }
+            fclose($logFp);
+            foreach($logs as $log){
                 $fields = $this->buildFields($log);
                 $time = $fields[$this->config['time']];
                 if(!is_numeric($time)){
@@ -427,7 +435,6 @@ class Log{
 
                 $this->getFields($fields);
             }
-            fclose($logFp);
         }
 
         return $this->got();
