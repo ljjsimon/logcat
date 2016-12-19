@@ -4,7 +4,7 @@ set_time_limit(0);
 require "lib/config.php"; //$sysConfig
 $config = json_decode(file_get_contents('config.json'),true);
 $config = array_merge($sysConfig,$config);
-$config['rootPath'] = dirname(__FILE__);
+$config['rootPath'] = __DIR__;
 date_default_timezone_set($config['timezone']);
 
 //init controller

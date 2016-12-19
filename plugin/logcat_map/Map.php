@@ -46,6 +46,6 @@ class Map extends Log{
     }
 
     public function getHtml(){
-        return file_get_contents(dirname(__FILE__).'/index.html');
+        return file_get_contents(__DIR__ .'/index.html');
     }
 }
