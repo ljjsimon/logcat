@@ -123,7 +123,7 @@ class Log{
      * make index for files by time
      */
     protected function getMainIndex(&$mainIndexChanged){
-        $fileName = $this->config['rootPath'].$this->config['dataDir'].'/main.index';
+        $fileName = $this->config['rootPath'].'/'.$this->config['dataDir'].'/main.index';
         if(!file_exists($fileName)){
             return [];
         }
@@ -301,7 +301,7 @@ class Log{
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
     
-    protected function filterInput1(){
+    protected function filterInput(){
         isset($_GET['sum']) && $this->__set('sum', $_GET['sum']);
         isset($_GET['count']) && $_GET['count']!='false' && $this->__set('count', $_GET['count']);
         isset($_GET['distinct']) && $this->__set('distinct', $_GET['distinct']);
