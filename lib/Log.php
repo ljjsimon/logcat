@@ -55,14 +55,7 @@ class Log{
         if($mainIndexChanged){
             $this->saveMainIndex($mainIndex);
         }
-        $this->writeErrorLog();
-    }
-
-    protected function writeErrorLog(){
-        if(empty($this->errorLog)){
-            return;
-        }
-        file_put_contents($this->config['dataDir'].'/error.log', $this->errorLog, FILE_APPEND);
+        $this->writeLog($this->config['dataDir'].'/error.log',$this->errorLog);
     }
 
     /*
