@@ -207,7 +207,7 @@ class Log{
             $url_query = $this->config['url_query'];
             if($fields[$url_query]){
                 parse_str($fields[$url_query],$arr);
-                unset($fields[$url_query]);
+                //unset($fields[$url_query]);
                 foreach($arr as $k=>$v){
                     $fields[$url_query.'.'.$k] = $v;
                 }
