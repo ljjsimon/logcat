@@ -27,10 +27,10 @@ You can use it by open a broswer and typeing localhost:8080.
 
 ##Performance
 PHP version：7  
-CPU：2.4GHz  
-log files：22 files, 2.56G totally  
-making index costs.131sec  
-one full search costs：5.587sec  
+CPU: 2.4GHz  
+log files: 22 files, 2.56G totally  
+making index costs: 41.131sec  
+one full search costs: 5.587sec  
 ( excluding compiling time, please use opcache )
 
 ##Debug
