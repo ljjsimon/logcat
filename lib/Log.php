@@ -204,18 +204,15 @@ class Log{
         $fields = array_combine($this->config['logFormatAs'],$match);
         
         if(isset($this->config['url_query'])){
-            $http_query = $this->config['url_query'];
-            if($fields[$http_query]){
-                $query = explode('&',$fields[$http_query]);
-                foreach($query as $v){
-                    $pos = strpos($v,'=');
-                    if($pos===false){
-                        continue;
-                    }
-                    $fields[$http_query.'.'.substr($v,0,$pos)] = substr($v,$pos+1);
+            $url_query = $this->config['url_query'];
+            if($fields[$url_query]){
+                parse_str($fields[$url_query],$arr);
+                unset($fields[$url_query]);
+                foreach($arr as $k=>$v){
+                    $fields[$url_query.'.'.$k] = $v;
                 }
-                unset($fields[$http_query]);
             }
+            
         }
         return $fields;
     }
@@ -278,6 +275,7 @@ class Log{
             $pos = array_merge($pos,array_values($_pos));
         }
         fclose($fp);
+        sort($pos);
         return $pos;
     }
     
