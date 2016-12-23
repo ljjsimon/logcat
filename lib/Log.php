@@ -292,18 +292,18 @@ class Log{
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
     
-    protected function filterInput(){
-        isset($_GET['sum']) && $this->__set('sum', $_GET['sum']);
-        isset($_GET['count']) && $_GET['count']!='false' && $this->__set('count', $_GET['count']);
-        isset($_GET['distinct']) && $this->__set('distinct', $_GET['distinct']);
-        isset($_GET['table']) && $this->__set('table', $_GET['table']);
-        isset($_GET['period']) && $this->__set('period',$_GET['period']);
-        isset($_GET['stime']) && $this->__set('stime', $_GET['stime']);
-        isset($_GET['etime']) && $this->__set('etime', $_GET['etime']);
-        isset($_GET['datetimerange']) && $this->__set('datetimerange', $_GET['datetimerange']);
-        isset($_GET['group']) && $this->__set('group', $_GET['group']);
-        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
-            $this->__set('where', array_combine($_GET['where_f'], $_GET['where_v']));
+    protected function filterInput($input){
+        isset($input['sum']) && $this->__set('sum', $input['sum']);
+        isset($input['count']) && $input['count']!='false' && $this->__set('count', $input['count']);
+        isset($input['distinct']) && $this->__set('distinct', $input['distinct']);
+        isset($input['table']) && $this->__set('table', $input['table']);
+        isset($input['period']) && $this->__set('period',$input['period']);
+        isset($input['stime']) && $this->__set('stime', $input['stime']);
+        isset($input['etime']) && $this->__set('etime', $input['etime']);
+        isset($input['datetimerange']) && $this->__set('datetimerange', $input['datetimerange']);
+        isset($input['group']) && $this->__set('group', $input['group']);
+        if(isset($input['where_f']) && isset($input['where_v'])){
+            $this->__set('where', array_combine($input['where_f'], $input['where_v']));
         }
     }
 
@@ -385,8 +385,8 @@ class Log{
         ];
     }
     
-    public function get(){
-        $this->filterInput();
+    public function get($input){
+        $this->filterInput($input);
         $this->prepareQuery();
         $this->beforeGet();
         $stime = $this->stime;
