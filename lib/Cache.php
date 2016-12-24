@@ -6,18 +6,21 @@ class Cache{
         $this->cache[$key] = $value;
         $this->expire[$key] = [
             'updated_at' => time(),
-            'expire' => 600 + rand(5,60)
+            'expire' => 0
         ];
     }
     
     public function get($key){
+        if(!isset($this->expire[$key])){
+            return null;
+        }
         $now = time();
-        $expire = $this->expire['expire'];
+        $expire = $this->expire[$key]['expire'];
         if($expire && ($expire+$this->expire[$key]['updated_at'] < $now)){
             unset($this->cache[$key]);
             unset($this->expire[$key]);
         }
-        return isset($this->cache[$key]) ? $this->cache[$key] : false;
+        return isset($this->cache[$key]) ? $this->cache[$key] : null;
     }
     
     public function loopExpire(){

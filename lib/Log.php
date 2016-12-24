@@ -1,138 +1,17 @@
 <?php
 class Log{
-    protected $config,$mainIndex,$logFormat,$fieldPos,$errorLog='';
+    protected $config,$cache,$mainIndex,$logFormat;
     protected $sum,$count,$distinct,$table,$where,$whereSign,$group;
     protected $stime,$etime,$period;
     
-    public function __construct($config){
+    public function __construct($config, $cache){
         $this->config = $config;
-    }
+        $this->cache = $cache;
+        $this->mainIndex = $cache->get('mainIndex');
 
-    public function makeIndex(){
-        $config = $this->config;
         $logFormat = str_replace(array_keys($config['formatReg']),array_values($config['formatReg']),$config['logFormat']);
         $logFormat = "/".$logFormat."/i";
         $this->logFormat = $logFormat;
-        $fieldPos = $config['logFormatAs'];
-        $fieldPos = array_flip($fieldPos);
-        $this->fieldPos = $fieldPos;
-        $tablePos = $fieldPos[$config['table']];
-        $timePos = $fieldPos[$config['time']];
-        $mainIndexChanged = false;
-        $mainIndex = $this->getMainIndex($mainIndexChanged);
-        //一级目录
-        $dir = $config['rootPath'].'/'.$config['dataDir'];
-        $_dh = opendir($dir);
-        
-        while(($_dir = readdir($_dh)) !== false){
-            if($_dir == '.' || $_dir == '..' || $_dir == '.DS_Store'){
-                continue;
-            }
-            $sub_dir = $dir.'/'.$_dir;
-            if(!is_dir($sub_dir)){
-                continue;
-            }
-
-            //二级目录
-            $dh = opendir($sub_dir);
-
-            while(($file = readdir($dh)) !== false){
-                $_file = $sub_dir.'/'.$file;
-                if(!is_file($_file) || $file == '.DS_Store'){
-                    continue;
-                }
-                $extension = pathinfo($file,PATHINFO_EXTENSION);
-                if($extension == 'index' || array_key_exists($_file,$mainIndex)){
-                    continue;
-                }
-                $mainIndex[$_file] = $this->_makeIndex($_file,$logFormat,$tablePos,$timePos);
-                $mainIndexChanged = true;
-            }
-            closedir($dh);
-        }
-        closedir($_dh);
-        $this->mainIndex = $mainIndex;
-        if($mainIndexChanged){
-            $this->saveMainIndex($mainIndex);
-        }
-        $this->writeLog($this->config['dataDir'].'/error.log',$this->errorLog);
-    }
-
-    /*
-     * make index for files by table
-     */
-    protected function _makeIndex($file,$logFormat,$tablePos,$timePos){
-        $stime = 0;
-        $etime = 0;
-        $index = [];
-        $fp = fopen($file,'r');
-        $l=0;
-        while(!feof($fp)){
-            $l++;
-            $pos = ftell($fp);
-            $line = fgets($fp);
-            if(empty($line)){
-                continue;
-            }
-            $res = preg_match($logFormat, $line, $match);
-            if(!$res){
-                $this->errorLog .= "$file, line $l\n";
-                continue;
-            }
-            $table = $match[$tablePos+1];
-            $etime = $match[$timePos+1];
-            if(!$stime){
-                $stime = $etime;
-            }
-
-            if(!array_key_exists($table, $index)){
-                $index[$table] = [];
-            }
-            $index[$table][] = $pos;
-        }
-        fclose($fp);
-
-        //compress
-        $tables = [];
-        $ifp = fopen($file.'.index','w');
-        foreach($index as $table=>$posArr){
-            array_unshift($posArr,'I*');
-            $posStr = call_user_func_array('pack', $posArr);
-            $start = ftell($ifp);
-            fwrite($ifp, $posStr);
-            $end = ftell($ifp);
-            $tables[$table] = [$start,$end];
-        }
-        fclose($ifp);
-        return [
-            'mtime'=>filemtime($file),
-            'stime'=>strtotime($stime),
-            'etime'=>strtotime($etime),
-            'tables' => $tables
-        ];
-    }
-
-    /*
-     * make index for files by time
-     */
-    protected function getMainIndex(&$mainIndexChanged){
-        $fileName = $this->config['rootPath'].'/'.$this->config['dataDir'].'/main.index';
-        if(!file_exists($fileName)){
-            return [];
-        }
-        $mainIndex = json_decode(file_get_contents($fileName),true);
-        foreach($mainIndex as $file=>$arr){
-            if(!file_exists($file) || filemtime($file) != $arr['mtime']){
-                unset($mainIndex[$file]);
-                $mainIndexChanged = true;
-            }
-        }
-        return $mainIndex;
-    }
-    
-    protected function saveMainIndex($mainIndex){
-        $fileName = $this->config['rootPath'].'/'.$this->config['dataDir'].'/main.index';
-        file_put_contents($fileName, json_encode($mainIndex));
     }
 
     public function __set($name,$val){
@@ -258,16 +137,26 @@ class Log{
         $table = $string;
         $len = strlen($table);
 
-        $fp = fopen($indexFile,'r');
-        foreach($tables as $_table=>$ipos){
-            if(!$this->matchLike($_table,$table,$start,$end,$len)){
-                continue;
+        $index = $this->cache->get($indexFile);
+        if($index){
+            foreach($tables as $_table=>$ipos){
+                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                    continue;
+                }
+                $pos = array_merge($pos,$index[$_table]);
             }
-            fseek($fp,$ipos[0]);
-            $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
-            $pos = array_merge($pos,array_values($_pos));
+        }else{
+            $fp = fopen($indexFile,'r');
+            foreach($tables as $_table=>$ipos){
+                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                    continue;
+                }
+                fseek($fp,$ipos[0]);
+                $_pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
+                $pos = array_merge($pos,array_values($_pos));
+            }
+            fclose($fp);
         }
-        fclose($fp);
         sort($pos);
         return $pos;
     }
@@ -422,13 +311,6 @@ class Log{
         }
 
         return $this->got();
-    }
-    
-    protected function writeLog($file,$log){
-        if($log===''){
-            return;
-        }
-        file_put_contents($file,$log,FILE_APPEND);
     }
     
     public function getHtml(){
