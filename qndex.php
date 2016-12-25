@@ -15,9 +15,6 @@ $index = [];
 $index = new Index($config,$cache);
 $index->makeIndex();
 
-$index->collectLog('example/nginx_access.log',"\n".'123.65.150.10 - - [23/Aug/2016:14:50:59 +0800] "POST /wordpress3/wp-admin/admin-ajax.php?id=1234 HTTP/1.1" 200 2 "http://www.example.com/wordpress3/wp-admin/post-new.php" "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.25 Safari/534.3"');
-exit;
-
 $serv = new swoole_http_server("0.0.0.0", 8080);
 $serv->set([
     'worker_num' => 1,
@@ -29,16 +26,19 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
     $ext = strtolower(strrchr($request->server["request_uri"],'.'));
     if( $ext && $ext != '.php'){
         $contentType = [
-            '.css' => 'text/css'
+            '.css' => 'text/css',
+            '.js' => 'application/x-javascript',
+            '.svg' => 'text/xml'
         ];
         $response->header("Content-Type", $contentType[$ext]);
-        $response->end(file_get_contents($config['rootPath'].$request->server["request_uri"]));
+        $response->sendfile($config['rootPath'].$request->server["request_uri"]);
+        return;
     }
     
     //write log from collectors
     if(isset($request->post['collector_id']) && isset($request->post['log']) && isset($config['collector_log_file'][$request->post['collector_id']])) {
         $serv->task($request->post, -1, function (swoole_server $serv, $task_id, $data) use ($index, $config){
-            $index->collectLog($config['collector_log_file'][$data['collector_id']], $data['log']);
+            $index->collectLog($data['collector_id'], $data['log']);
         });
         return;
     }
@@ -49,15 +49,21 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
     //echo pages
     $p = isset($_GET['p']) ? $_GET['p'] : '';
     unset($_GET['p']);
-    $log = new Log;
-    
+    $log = new Log($config,$cache);
+
+    $log->test($serv);
+    return;
+
     if(isset($_GET['getConfig'])){
         $config['p'] = $p;
         $response->end(json_encode($config));
+        return;
     }elseif(empty($_GET) && empty($_POST)){
         $header = file_get_contents('view/header.html');
         $footer = file_get_contents('view/footer.html');
+        $response->header("Content-Type", 'text/html');
         $response->end($header.$log->getHtml().$footer);
+        return;
     }
     
     $response->end(json_encode($log->get(array_merge($_GET,$_POST))));

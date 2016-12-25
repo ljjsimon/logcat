@@ -69,10 +69,10 @@ class Index{
             return [];
         }
         $index = [];
-        $fp = fopen($file.'.index');
+        $fp = fopen($file.'.index','r');
         foreach($mainIndex[$file]['tables'] as $table => $ipos){
             fseek($fp,$ipos[0]);
-            $pos = unpack('I*',$fp,$ipos[1]-$ipos[0]);
+            $pos = unpack('I*',fread($fp,$ipos[1]-$ipos[0]));
             $index[$table] = array_values($pos);
         }
         return $index;
@@ -179,15 +179,17 @@ class Index{
         file_put_contents($file,$log,FILE_APPEND);
     }
 
-    public function collectLog($file, $log){
+    public function collectLog($collector_id, $log){
         $config = $this->config;
         if($log == ''){
             return;
         }
 
-        $file = $config['rootPath'].'/'.$config['dataDir'].'/'.$file;
+        $file = $config['rootPath'].'/'.$config['dataDir'].'/'.$config['collector_log_file'][$collector_id];
         file_put_contents($file,$log,FILE_APPEND);
+        clearstatcache();
         $mainIndex = $this->cache->get('mainIndex');
+        var_dump($mainIndex);
         $epos = isset($mainIndex[$file]['epos']) ? $mainIndex[$file]['epos'] : 0;
         $_mainIndex = $this->_makeIndex($file, $epos);
         if(!isset($mainIndex[$file])){
@@ -198,6 +200,7 @@ class Index{
             $mainIndex[$file]['epos'] = $_mainIndex['epos'];
             $mainIndex[$file]['tables'] = array_merge($mainIndex[$file]['tables'],$_mainIndex['tables']); 
         }
+        var_dump($mainIndex);
         $this->cache->set('mainIndex',$mainIndex);
         $this->saveMainIndex($mainIndex);
     }
