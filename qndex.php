@@ -51,9 +51,6 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
     unset($_GET['p']);
     $log = new Log($config,$cache);
 
-    $log->test($serv);
-    return;
-
     if(isset($_GET['getConfig'])){
         $config['p'] = $p;
         $response->end(json_encode($config));

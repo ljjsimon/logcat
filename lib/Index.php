@@ -189,7 +189,6 @@ class Index{
         file_put_contents($file,$log,FILE_APPEND);
         clearstatcache();
         $mainIndex = $this->cache->get('mainIndex');
-        var_dump($mainIndex);
         $epos = isset($mainIndex[$file]['epos']) ? $mainIndex[$file]['epos'] : 0;
         $_mainIndex = $this->_makeIndex($file, $epos);
         if(!isset($mainIndex[$file])){
@@ -200,7 +199,6 @@ class Index{
             $mainIndex[$file]['epos'] = $_mainIndex['epos'];
             $mainIndex[$file]['tables'] = array_merge($mainIndex[$file]['tables'],$_mainIndex['tables']); 
         }
-        var_dump($mainIndex);
         $this->cache->set('mainIndex',$mainIndex);
         $this->saveMainIndex($mainIndex);
     }
