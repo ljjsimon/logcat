@@ -55,6 +55,8 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
     $p = isset($_GET['p']) ? $_GET['p'] : '';
     unset($_GET['p']);
     $log = new Log($config,$cache);
+    
+    $log->test($serv);
 
     if(isset($_GET['getConfig'])){
         $config['p'] = $p;

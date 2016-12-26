@@ -281,6 +281,7 @@ class Log{
         $stime = $this->stime;
         $etime = $this->etime;
         $table = $this->table;
+        $timeAs = $this->config['time'];
         $logFiles = $this->getLogFiles($stime,$etime);
 
         foreach($logFiles as $file=>$tables){
@@ -294,7 +295,7 @@ class Log{
                 fseek($logFp,$pos);
                 $log = fgets($logFp);
                 $fields = $this->buildFields($log);
-                $time = $fields[$this->config['time']];
+                $time = $fields[$timeAs];
                 if(!is_numeric($time)){
                     $time = strtotime($time);
                 }
@@ -313,7 +314,52 @@ class Log{
         return $this->got();
     }
     
+    public function readLog($file,$tables,$table,$stime,$etime,$timeAs){
+        $posArr = $this->getPos($file.'.index',$tables,$table);
+        $logFp = fopen($file,'r');
+        $logs = [];
+        foreach($posArr as $pos){
+            fseek($logFp,$pos);
+            $log = fgets($logFp);
+            $fields = $this->buildFields($log);
+            $time = $fields[$timeAs];
+            if(!is_numeric($time)){
+                $time = strtotime($time);
+            }
+            if($time > $etime || $time < $stime){
+                continue;
+            }
+            if(!$this->filterWhere($fields)){
+                continue;
+            }
+            $logs[] = $fields;
+        }
+        fclose($logFp);
+        
+        return $logs;
+    }
+    
     public function getHtml(){
         return file_get_contents($this->config['rootPath'].'/view/index.html');
+    }
+    
+    public function test($serv){
+        $stime = 1471795200;
+        $etime = 1471968000;
+        $table = '%admin%';
+        $timeAs = 'time';
+        $file = '/root/workshop/logcat/data/example/nginx_access.log';
+        $tables = [
+            "/wordpress3/wp-admin/admin-ajax.php" => [0,40]
+        ];
+        $data = [
+            [$this,'readLog'],
+            [$file,$tables,$table,$stime,$etime,$timeAs]
+        ];
+        $self = $this;
+        $res = $serv->task($data,-1,function(swoole_server $serv, $task_id, $data) use($self){
+            return call_user_func_array([$self,'readLog'],$data[1]);
+        });
+        var_dump($res);
     }
 }
