@@ -7,8 +7,8 @@ date_default_timezone_set($config['timezone']);
 
 
 require 'lib/Log.php';
-require 'Lib/Index.php';
-require 'Lib/Cache.php';
+require 'lib/Index.php';
+require 'lib/Cache.php';
 $cache = new Cache;
 $mainIndex = [];
 $index = [];
@@ -28,9 +28,14 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         $contentType = [
             '.css' => 'text/css',
             '.js' => 'application/x-javascript',
-            '.svg' => 'text/xml'
+            '.svg' => 'text/xml',
+            '.ico' => 'image/x-icon',
+            '.woff' => 'application/font-woff',
+            
         ];
-        $response->header("Content-Type", $contentType[$ext]);
+        if(isset($contentType[$ext])){
+            $response->header("Content-Type", $contentType[$ext]);
+        }
         $response->sendfile($config['rootPath'].$request->server["request_uri"]);
         return;
     }

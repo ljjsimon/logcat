@@ -103,7 +103,7 @@ class Index{
         }
         while(!feof($fp)){
             $pos = ftell($fp);
-            $line = trim(fgets($fp));
+            $line = fgets($fp);
             if(empty($line)){
                 continue;
             }

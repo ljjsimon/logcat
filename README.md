@@ -7,6 +7,9 @@ Simple yet powerful log analyser, based on PHP
 Logcat is a log analyzation platform. It's not only for log files, but also for all structed text files.  
 Logcat makes index for all files, and enables you search logs in a way like using SQL( count(),sum()... from... where ) 
 
+##Requirement
+[swoole](https://github.com/swoole/swoole-src)(Needs cygwin in windows. If you don't mind a little slower, checkout branch sapi)
+
 ##Installation
 ```shell
 git clone https://github.com/questionlin/logcat.git
@@ -20,10 +23,9 @@ It doesn't matter how many subfolders it has.
 ##Usage
 Type the following code to make index for the first time. It may cost some time.
 ```shell
-php index.php
-php -S localhost:8080 index.php &
+php index.php &
 ```
-You can use it by open a broswer and typeing localhost:8080.
+You can use it by open a broswer and typeing 127.0.0.1:8080.
 
 ##Performance
 PHP version：7  
