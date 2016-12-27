@@ -109,10 +109,10 @@ class Log{
             }elseif($sign == '=' && $_value !== $value){
                 return false;
             }elseif($sign == 'like'){
-                extract($this->prepareLike($value));//$string,$start,$end
+                extract(self::prepareLike($value));//$string,$start,$end
                 $value = $string;
                 $len = strlen($table);
-                if(!$this->matchLike($_value,$value,$start,$end,$len)){
+                if(!self::matchLike($_value,$value,$start,$end,$len)){
                     return false;
                 }
             }
@@ -133,14 +133,14 @@ class Log{
         }
 
         $pos = [];
-        extract($this->prepareLike($table));//$string,$start,$end
+        extract(self::prepareLike($table));//$string,$start,$end
         $table = $string;
         $len = strlen($table);
 
         $index = $this->cache->get($indexFile);
         if($index){
             foreach($tables as $_table=>$ipos){
-                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                if(!self::matchLike($_table,$table,$start,$end,$len)){
                     continue;
                 }
                 $pos = array_merge($pos,$index[$_table]);
@@ -148,7 +148,7 @@ class Log{
         }else{
             $fp = fopen($indexFile,'r');
             foreach($tables as $_table=>$ipos){
-                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                if(!self::matchLike($_table,$table,$start,$end,$len)){
                     continue;
                 }
                 fseek($fp,$ipos[0]);
@@ -161,7 +161,7 @@ class Log{
         return $pos;
     }
     
-    protected function prepareLike($string){
+    protected static function prepareLike($string){
         $start = true; //前面严格匹配
         $end = true; //后面严格匹配
         $len = strlen($string);
@@ -176,7 +176,7 @@ class Log{
         return compact('string','start','end');
     }
     
-    protected function matchLike($string,$str,$start,$end,$len){
+    protected static function matchLike($string,$str,$start,$end,$len){
         $i = strpos($string,$str);
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
@@ -274,7 +274,7 @@ class Log{
         ];
     }
     
-    public function get($input){
+    public function _get($input){
         $this->filterInput($input);
         $this->prepareQuery();
         $this->beforeGet();
@@ -313,7 +313,7 @@ class Log{
 
         return $this->got();
     }
-    
+
     public function readLog($file,$tables,$table,$stime,$etime,$timeAs){
         $posArr = $this->getPos($file.'.index',$tables,$table);
         $logFp = fopen($file,'r');
@@ -342,24 +342,5 @@ class Log{
     public function getHtml(){
         return file_get_contents($this->config['rootPath'].'/view/index.html');
     }
-    
-    public function test($serv){
-        $stime = 1471795200;
-        $etime = 1471968000;
-        $table = '%admin%';
-        $timeAs = 'time';
-        $file = '/root/workshop/logcat/data/example/nginx_access.log';
-        $tables = [
-            "/wordpress3/wp-admin/admin-ajax.php" => [0,40]
-        ];
-        $data = [
-            [$this,'readLog'],
-            [$file,$tables,$table,$stime,$etime,$timeAs]
-        ];
-        $self = $this;
-        $res = $serv->task($data,-1,function(swoole_server $serv, $task_id, $data) use($self){
-            return call_user_func_array([$self,'readLog'],$data[1]);
-        });
-        var_dump($res);
-    }
+
 }
