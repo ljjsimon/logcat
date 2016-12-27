@@ -265,7 +265,7 @@ class Log{
         }
     }
     
-    protected function got(){
+    protected function got_bak(){
         $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
 
         return [
@@ -274,7 +274,7 @@ class Log{
         ];
     }
     
-    public function get($input){
+    public function get_bak($input){
         $this->filterInput($input);
         $this->prepareQuery();
         $this->beforeGet();
@@ -314,7 +314,33 @@ class Log{
         return $this->got();
     }
     
-    public function readLog($file,$tables,$table,$stime,$etime,$timeAs){
+    public function get($input,$serv){
+        $this->filterInput($input);
+        $this->prepareQuery();
+        $this->beforeGet();
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $logFiles = $this->getLogFiles($stime,$etime);
+
+        $tasks = [];
+        foreach($logFiles as $file=>$tables){
+            if(!is_file($file)){
+                continue;
+            }
+            $tasks[] = [$this,$file,$tables];
+        }
+        
+        $result = $ser->taskWaitMulti($tasks);
+
+        return $this->got($result);
+    }
+    
+    public function readLog($file, $tables){
+        $tables = $this->tables;
+        $table = $this->table;
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $timeAs = $this->config['time'];
         $posArr = $this->getPos($file.'.index',$tables,$table);
         $logFp = fopen($file,'r');
         $logs = [];
@@ -339,27 +365,28 @@ class Log{
         return $logs;
     }
     
-    public function getHtml(){
-        return file_get_contents($this->config['rootPath'].'/view/index.html');
+    protected function got($result){
+        $yData = [];
+        if($this->count){
+            $yData = array_reduce($result,function($row1,$row2){
+                if(!$row1){
+                    return $row2;
+                }
+                return array_map(function($col1,$col2){
+                    return $col1+$col2;
+                },$row1,$row2);
+            }
+        }
+        
+        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
+
+        return [
+            'xData' => $xData,
+            'yData' => $yData
+        ];
     }
     
-    public function test($serv){
-        $stime = 1471795200;
-        $etime = 1471968000;
-        $table = '%admin%';
-        $timeAs = 'time';
-        $file = '/root/workshop/logcat/data/example/nginx_access.log';
-        $tables = [
-            "/wordpress3/wp-admin/admin-ajax.php" => [0,40]
-        ];
-        $data = [
-            [$this,'readLog'],
-            [$file,$tables,$table,$stime,$etime,$timeAs]
-        ];
-        $self = $this;
-        $res = $serv->task($data,-1,function(swoole_server $serv, $task_id, $data) use($self){
-            return call_user_func_array([$self,'readLog'],$data[1]);
-        });
-        var_dump($res);
+    public function getHtml(){
+        return file_get_contents($this->config['rootPath'].'/view/index.html');
     }
 }

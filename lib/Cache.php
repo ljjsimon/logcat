@@ -36,4 +36,9 @@ class Cache{
     public function expire($key,$sec){
         $this->expire[$key]['expire'] = $sec;
     }
+    
+    public function del($key){
+        unset($this->expire[$key]);
+        unset($this->cache[$key]);
+    }
 }
