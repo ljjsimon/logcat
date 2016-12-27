@@ -25,7 +25,9 @@ class Log{
                 $val *= 3600;
                 break;
             case 'datetimerange':
+            var_dump($val);
                 $this->stime = strtotime($val[0]);
+                var_dump($this->stime);
                 $this->etime = strtotime($val[1]);
                 break;
             case 'stime':
@@ -265,7 +267,7 @@ class Log{
         }
     }
     
-    protected function got(){
+    protected function got_bak(){
         $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
 
         return [
@@ -274,7 +276,7 @@ class Log{
         ];
     }
     
-    public function _get($input){
+    public function get_bak($input){
         $this->filterInput($input);
         $this->prepareQuery();
         $this->beforeGet();
@@ -313,8 +315,37 @@ class Log{
 
         return $this->got();
     }
+    
+    public function get($input,$serv){
+        $this->filterInput($input);
+        $this->prepareQuery();
+        $this->beforeGet();
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $logFiles = $this->getLogFiles($stime,$etime);
 
-    public function readLog($file,$tables,$table,$stime,$etime,$timeAs){
+        $tasks = [];
+        foreach($logFiles as $file=>$tables){
+            if(!is_file($file)){
+                continue;
+            }
+            $tasks[] = [
+                [$this,'logMap'],
+                [$file,$tables]
+            ];
+        }
+        
+        //$result = $ser->taskWaitMulti($tasks);
+
+        //return $this->got($result);
+    }
+    
+    public function logMap($file, $tables){
+        $tables = $this->tables;
+        $table = $this->table;
+        $stime = $this->stime;
+        $etime = $this->etime;
+        $timeAs = $this->config['time'];
         $posArr = $this->getPos($file.'.index',$tables,$table);
         $logFp = fopen($file,'r');
         $logs = [];
@@ -339,8 +370,28 @@ class Log{
         return $logs;
     }
     
+    protected function got($result){
+        $yData = [];
+        if($this->count){
+            $yData = array_reduce($result,function($row1,$row2){
+                if(!$row1){
+                    return $row2;
+                }
+                return array_map(function($col1,$col2){
+                    return $col1+$col2;
+                },$row1,$row2);
+            });
+        }
+        
+        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
+
+        return [
+            'xData' => $xData,
+            'yData' => $yData
+        ];
+    }
+    
     public function getHtml(){
         return file_get_contents($this->config['rootPath'].'/view/index.html');
     }
-
 }
