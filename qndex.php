@@ -3,7 +3,7 @@ require 'lib/config.php'; //$sysConfig
 $config = json_decode(file_get_contents('config.json'),true);
 $config = array_merge($sysConfig, $config);
 $config['rootPath'] = __DIR__;
-//date_default_timezone_set($config['timezone']);
+date_default_timezone_set($config['timezone']);
 
 require 'lib/Log.php';
 require 'lib/Index.php';
@@ -67,6 +67,9 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         return;
     }
     
+    $_GET['table'] = '%admin%';
+    $_GET['datetimerange'][0] = "Aug 23 2016 00:00:00 GMT+0800 (CST)";
+    $_GET['datetimerange'][1] = "Aug 24 2016 00:00:00 GMT+0800 (CST)";
     $response->end(json_encode($log->get(array_merge($_GET,$_POST),$serv)));
 });
 

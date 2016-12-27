@@ -25,9 +25,7 @@ class Log{
                 $val *= 3600;
                 break;
             case 'datetimerange':
-            var_dump($val);
                 $this->stime = strtotime($val[0]);
-                var_dump($this->stime);
                 $this->etime = strtotime($val[1]);
                 break;
             case 'stime':
@@ -267,55 +265,6 @@ class Log{
         }
     }
     
-    protected function got_bak(){
-        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
-
-        return [
-            'xData' => $xData,
-            'yData' => array_values($this->dataArr)
-        ];
-    }
-    
-    public function get_bak($input){
-        $this->filterInput($input);
-        $this->prepareQuery();
-        $this->beforeGet();
-        $stime = $this->stime;
-        $etime = $this->etime;
-        $table = $this->table;
-        $timeAs = $this->config['time'];
-        $logFiles = $this->getLogFiles($stime,$etime);
-
-        foreach($logFiles as $file=>$tables){
-            if(!is_file($file)){
-                continue;
-            }
-            
-            $posArr = $this->getPos($file.'.index',$tables,$table);
-            $logFp = fopen($file,'r');
-            foreach($posArr as $pos){
-                fseek($logFp,$pos);
-                $log = fgets($logFp);
-                $fields = $this->buildFields($log);
-                $time = $fields[$timeAs];
-                if(!is_numeric($time)){
-                    $time = strtotime($time);
-                }
-                if($time > $etime || $time < $stime){
-                    continue;
-                }
-                if(!$this->filterWhere($fields)){
-                    continue;
-                }
-
-                $this->getFields($fields);
-            }
-            fclose($logFp);
-        }
-
-        return $this->got();
-    }
-    
     public function get($input,$serv){
         $this->filterInput($input);
         $this->prepareQuery();
@@ -335,20 +284,19 @@ class Log{
             ];
         }
         
-        //$result = $ser->taskWaitMulti($tasks);
+        $res = $serv->taskWaitMulti($tasks);
 
-        //return $this->got($result);
+        return $this->got($res);
     }
     
     public function logMap($file, $tables){
-        $tables = $this->tables;
         $table = $this->table;
         $stime = $this->stime;
         $etime = $this->etime;
         $timeAs = $this->config['time'];
         $posArr = $this->getPos($file.'.index',$tables,$table);
         $logFp = fopen($file,'r');
-        $logs = [];
+
         foreach($posArr as $pos){
             fseek($logFp,$pos);
             $log = fgets($logFp);
@@ -363,16 +311,16 @@ class Log{
             if(!$this->filterWhere($fields)){
                 continue;
             }
-            $logs[] = $fields;
+            $this->getFields($fields);
         }
         fclose($logFp);
         
-        return $logs;
+        return $this->dataArr;
     }
     
     protected function got($result){
         $yData = [];
-        if($this->count){
+        if($this->count || $this->sum){
             $yData = array_reduce($result,function($row1,$row2){
                 if(!$row1){
                     return $row2;
@@ -381,6 +329,7 @@ class Log{
                     return $col1+$col2;
                 },$row1,$row2);
             });
+        }elseif($this->distinct){
         }
         
         $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
