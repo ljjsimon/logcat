@@ -67,9 +67,9 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         return;
     }
     
-    $_GET['table'] = '%admin%';
-    $_GET['datetimerange'][0] = "Aug 23 2016 00:00:00 GMT+0800 (CST)";
-    $_GET['datetimerange'][1] = "Aug 24 2016 00:00:00 GMT+0800 (CST)";
+    //$_GET['table'] = '%bbs%';
+    //$_GET['datetimerange'][0] = "Dec 01 2016 00:00:00 GMT+0800 (CST)";
+    //$_GET['datetimerange'][1] = "Dec 28 2016 00:00:00 GMT+0800 (CST)";
     $response->end(json_encode($log->get(array_merge($_GET,$_POST),$serv)));
 });
 
