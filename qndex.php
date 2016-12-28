@@ -5,7 +5,6 @@ $config = array_merge($sysConfig, $config);
 $config['rootPath'] = __DIR__;
 date_default_timezone_set($config['timezone']);
 
-
 require 'lib/Log.php';
 require 'lib/Index.php';
 require 'lib/Cache.php';
@@ -47,7 +46,7 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         });
         return;
     }
-    
+
     $_GET = isset($request->get) ? $request->get : [];
     $_POST = isset($request->post) ? $request->post : [];
 
@@ -55,8 +54,6 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
     $p = isset($_GET['p']) ? $_GET['p'] : '';
     unset($_GET['p']);
     $log = new Log($config,$cache);
-    
-    $log->test($serv);
 
     if(isset($_GET['getConfig'])){
         $config['p'] = $p;
@@ -70,11 +67,14 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         return;
     }
     
-    $response->end(json_encode($log->get(array_merge($_GET,$_POST))));
+    $_GET['table'] = '%admin%';
+    $_GET['datetimerange'][0] = "Aug 23 2016 00:00:00 GMT+0800 (CST)";
+    $_GET['datetimerange'][1] = "Aug 24 2016 00:00:00 GMT+0800 (CST)";
+    $response->end(json_encode($log->get(array_merge($_GET,$_POST),$serv)));
 });
 
 $serv->on('Task', function(swoole_server $serv, $task_id, $from_id, $data){
-    return $data;
+    return call_user_func_array($data[0], $data[1]);
 });
 
 $serv->on('Finish', function(swoole_server $serv, $task_id, $data){

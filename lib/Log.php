@@ -109,10 +109,10 @@ class Log{
             }elseif($sign == '=' && $_value !== $value){
                 return false;
             }elseif($sign == 'like'){
-                extract($this->prepareLike($value));//$string,$start,$end
+                extract(self::prepareLike($value));//$string,$start,$end
                 $value = $string;
                 $len = strlen($table);
-                if(!$this->matchLike($_value,$value,$start,$end,$len)){
+                if(!self::matchLike($_value,$value,$start,$end,$len)){
                     return false;
                 }
             }
@@ -133,14 +133,14 @@ class Log{
         }
 
         $pos = [];
-        extract($this->prepareLike($table));//$string,$start,$end
+        extract(self::prepareLike($table));//$string,$start,$end
         $table = $string;
         $len = strlen($table);
 
         $index = $this->cache->get($indexFile);
         if($index){
             foreach($tables as $_table=>$ipos){
-                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                if(!self::matchLike($_table,$table,$start,$end,$len)){
                     continue;
                 }
                 $pos = array_merge($pos,$index[$_table]);
@@ -148,7 +148,7 @@ class Log{
         }else{
             $fp = fopen($indexFile,'r');
             foreach($tables as $_table=>$ipos){
-                if(!$this->matchLike($_table,$table,$start,$end,$len)){
+                if(!self::matchLike($_table,$table,$start,$end,$len)){
                     continue;
                 }
                 fseek($fp,$ipos[0]);
@@ -161,7 +161,7 @@ class Log{
         return $pos;
     }
     
-    protected function prepareLike($string){
+    protected static function prepareLike($string){
         $start = true; //前面严格匹配
         $end = true; //后面严格匹配
         $len = strlen($string);
@@ -176,7 +176,7 @@ class Log{
         return compact('string','start','end');
     }
     
-    protected function matchLike($string,$str,$start,$end,$len){
+    protected static function matchLike($string,$str,$start,$end,$len){
         $i = strpos($string,$str);
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
@@ -265,55 +265,6 @@ class Log{
         }
     }
     
-    protected function got_bak(){
-        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
-
-        return [
-            'xData' => $xData,
-            'yData' => array_values($this->dataArr)
-        ];
-    }
-    
-    public function get_bak($input){
-        $this->filterInput($input);
-        $this->prepareQuery();
-        $this->beforeGet();
-        $stime = $this->stime;
-        $etime = $this->etime;
-        $table = $this->table;
-        $timeAs = $this->config['time'];
-        $logFiles = $this->getLogFiles($stime,$etime);
-
-        foreach($logFiles as $file=>$tables){
-            if(!is_file($file)){
-                continue;
-            }
-            
-            $posArr = $this->getPos($file.'.index',$tables,$table);
-            $logFp = fopen($file,'r');
-            foreach($posArr as $pos){
-                fseek($logFp,$pos);
-                $log = fgets($logFp);
-                $fields = $this->buildFields($log);
-                $time = $fields[$timeAs];
-                if(!is_numeric($time)){
-                    $time = strtotime($time);
-                }
-                if($time > $etime || $time < $stime){
-                    continue;
-                }
-                if(!$this->filterWhere($fields)){
-                    continue;
-                }
-
-                $this->getFields($fields);
-            }
-            fclose($logFp);
-        }
-
-        return $this->got();
-    }
-    
     public function get($input,$serv){
         $this->filterInput($input);
         $this->prepareQuery();
@@ -327,23 +278,25 @@ class Log{
             if(!is_file($file)){
                 continue;
             }
-            $tasks[] = [$this,$file,$tables];
+            $tasks[] = [
+                [$this,'logMap'],
+                [$file,$tables]
+            ];
         }
         
-        $result = $ser->taskWaitMulti($tasks);
+        $res = $serv->taskWaitMulti($tasks);
 
-        return $this->got($result);
+        return $this->got($res);
     }
     
-    public function readLog($file, $tables){
-        $tables = $this->tables;
+    public function logMap($file, $tables){
         $table = $this->table;
         $stime = $this->stime;
         $etime = $this->etime;
         $timeAs = $this->config['time'];
         $posArr = $this->getPos($file.'.index',$tables,$table);
         $logFp = fopen($file,'r');
-        $logs = [];
+
         foreach($posArr as $pos){
             fseek($logFp,$pos);
             $log = fgets($logFp);
@@ -358,16 +311,16 @@ class Log{
             if(!$this->filterWhere($fields)){
                 continue;
             }
-            $logs[] = $fields;
+            $this->getFields($fields);
         }
         fclose($logFp);
         
-        return $logs;
+        return $this->dataArr;
     }
     
     protected function got($result){
         $yData = [];
-        if($this->count){
+        if($this->count || $this->sum){
             $yData = array_reduce($result,function($row1,$row2){
                 if(!$row1){
                     return $row2;
@@ -375,7 +328,8 @@ class Log{
                 return array_map(function($col1,$col2){
                     return $col1+$col2;
                 },$row1,$row2);
-            }
+            });
+        }elseif($this->distinct){
         }
         
         $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
