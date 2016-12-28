@@ -125,8 +125,9 @@ class Index{
         }
         $epos = ftell($fp);
         fclose($fp);
-        $this->cache->set($file,$index);
-        $this->cache->expire($file, 600 + rand(5,60));
+        //costs too much memory
+        //$this->cache->set($file,$index);
+        //$this->cache->expire($file, 600 + rand(5,60));
 
         //compress
         $tables = [];

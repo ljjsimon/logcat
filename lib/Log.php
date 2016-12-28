@@ -242,20 +242,19 @@ class Log{
         }
         
         $key = $group ? $fields[$group] : intval(($time - $stime)/$period);
-        if($this->count){
+        if($this->distinct){
+            $value = $fields[$this->distinct];
+            if(!isset($this->dataArr[$key])){
+                $this->dataArr[$key] = [];
+            }
+            if(!in_array($value,$this->dataArr[$key])){
+                $this->dataArr[$key][] = $value;
+            }
+            return;
+        }elseif($this->count){
             $value = 1;
         }elseif($this->sum){
             $value = $fields[$this->sum];
-        }elseif($this->distinct){
-            $value = $fields[$this->distinct];
-            if($key != $this->lastDataKey){
-                $this->lastDataKey = $key;
-                $this->distinctArr = [];
-            }
-            if(!in_array($value,$this->distinctArr)){
-                $this->dataArr[$key] += 1;
-                $this->distinctArr[] = $value;
-            }
         }
 
         if(isset($this->dataArr[$key])){
@@ -279,17 +278,21 @@ class Log{
                 continue;
             }
             $tasks[] = [
-                [$this,'logMap'],
+                [$this,'mapLog'],
                 [$file,$tables]
             ];
         }
         
         $res = $serv->taskWaitMulti($tasks);
 
-        return $this->got($res);
+        return $this->reduceLog($res);
+    }
+
+    protected function getReduceData(){
+        return $this->dataArr;
     }
     
-    public function logMap($file, $tables){
+    public function mapLog($file, $tables){
         $table = $this->table;
         $stime = $this->stime;
         $etime = $this->etime;
@@ -315,28 +318,36 @@ class Log{
         }
         fclose($logFp);
         
-        return $this->dataArr;
+        return $this->getReduceData();
     }
     
-    protected function got($result){
-        $yData = [];
-        if($this->count || $this->sum){
-            $yData = array_reduce($result,function($row1,$row2){
-                if(!$row1){
-                    return $row2;
+    protected function reduceLog($results){
+        $isDistinct = $this->distinct;
+        $yData = null;
+        foreach($results as $result){
+            if(!$yData){
+                $yData = $result;
+                continue;
+            }
+            foreach($result as $key=>$value){
+                if(isset($yData[$key])){
+                    $yData[$key] = $isDistinct ? array_merge($yData[$key],$value) : $yData[$key]+$value;
+                }else{
+                    $yData[$key] = $value;
                 }
-                return array_map(function($col1,$col2){
-                    return $col1+$col2;
-                },$row1,$row2);
-            });
-        }elseif($this->distinct){
+            }
+        }
+        if($isDistinct){
+            array_map(function($v){
+                return count(array_unique($v));
+            },$yData);
         }
         
-        $xData = $this->group ? array_keys($this->dataArr) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
+        $xData = $this->group ? array_keys($yData) : array_map(function($v){return date('Y-m-d H:i:s',$v);}, $this->periodArr);
 
         return [
             'xData' => $xData,
-            'yData' => $yData
+            'yData' => array_values($yData)
         ];
     }
     
