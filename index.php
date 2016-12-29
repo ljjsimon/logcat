@@ -16,11 +16,11 @@ $index->makeIndex();
 
 $serv = new swoole_http_server("0.0.0.0", 8080);
 $serv->set([
-    'worker_num' => 2,
-    'task_worker_num' => 4
+    'worker_num' => 1,
+    'task_worker_num' => 1
 ]);
 
-$serv->on('Request', function($request, $response) use($serv, $config, $cache, $index){
+$serv->on('Request', function(swoole_http_request $request, swoole_http_response $response) use($serv, $config, $cache, $index){
     //static files
     $ext = strtolower(strrchr($request->server["request_uri"],'.'));
     if( $ext && $ext != '.php'){
@@ -67,9 +67,6 @@ $serv->on('Request', function($request, $response) use($serv, $config, $cache, $
         return;
     }
     
-    $_GET['table'] = '%admin%';
-    $_GET['datetimerange'][0] = "Aug 23 2016 00:00:00 GMT+0800 (CST)";
-    $_GET['datetimerange'][1] = "Aug 24 2016 00:00:00 GMT+0800 (CST)";
     $response->end(json_encode($log->get(array_merge($_GET,$_POST),$serv)));
 });
 

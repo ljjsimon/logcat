@@ -181,7 +181,7 @@ class Log{
         return !($i === false || ($start && $i!=0) || ($end && (strlen($string)-$i)!=$len));
     }
     
-    protected function filterInput($input){
+    protected function filterInput(array $input){
         isset($input['sum']) && $this->__set('sum', $input['sum']);
         isset($input['count']) && $input['count']!='false' && $this->__set('count', $input['count']);
         isset($input['distinct']) && $this->__set('distinct', $input['distinct']);
@@ -234,7 +234,7 @@ class Log{
     
     /* $fields, array combined $config['logFormatAs'] with one line of log
      */
-    protected function getFields($fields){
+    protected function getFields(array $fields){
         $group = $this->group;
         $stime = $this->stime;
         $period = $this->period;
@@ -266,7 +266,7 @@ class Log{
         }
     }
     
-    public function get($input,$serv){
+    public function get(array $input, swoole_server $serv){
         $this->filterInput($input);
         $this->prepareQuery();
         $this->beforeGet();
@@ -323,7 +323,7 @@ class Log{
         return $this->getReduceData();
     }
     
-    protected function reduceLog($results){
+    protected function reduceLog(array $results){
         $isDistinct = $this->distinct;
         $yData = null;
         foreach($results as $result){

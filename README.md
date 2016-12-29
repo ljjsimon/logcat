@@ -5,8 +5,8 @@ Simple yet powerful log analyser, based on PHP
 
 ##Overview
 Logcat is a log analyzation platform. It's not only for log files, but also for all structed text files.  
-Logcat makes index for all files, and enables you search logs in a way like using SQL( count(),sum()... from... where )  
-This version uses swoole to speed up by costing more momery and CPU. If you mind it, checkout branch sapi.( Branch sapi is stoped because the plugin system is different )
+Logcat makes index for all files, and enables you search logs in a way like using SQL( count(),sum()... from... where ).  
+This version uses swoole to speed up by costing more momery and CPU. If you mind it, checkout branch sapi.( Branch sapi is stoped because the plugin system is different ).
 
 ##Requirement
 [swoole](https://github.com/swoole/swoole-src)( Needs cygwin or BashOnWindows in windows )
@@ -34,7 +34,7 @@ CPU：2.7GHz I5
 log files：22 files, 2.56G totally  
 making index costs 283sec  
 one full search costs：3sec  
-( excluding compiling time, full search costs 16sec in branch sapi, PHP7 is much faster )
+( excluding compiling time, full search costs 16sec in single process, PHP7 is faster )
 
 ##Debug
 If the logformat is wrong, it will write wrong lines in data/error.log.  
