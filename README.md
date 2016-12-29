@@ -1,7 +1,7 @@
 #Logcat
 Simple yet powerful log analyser, based on PHP
 
-[中文版](https://github.com/questionlin/logcat/blob/master/README_zh.md)
+[中文版](https://github.com/questionlin/logcat/blob/master/docs/README_zh.md)
 
 ##Overview
 Logcat is a log analyzation platform. It's not only for log files, but also for all structed text files.  
