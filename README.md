@@ -29,12 +29,12 @@ php index.php &
 You can use it by open a broswer and typeing 127.0.0.1:8080.
 
 ##Performance
-PHP version：7  
-CPU：2.4GHz  
+PHP version：5.5  
+CPU：2.7GHz I5  
 log files：22 files, 2.56G totally  
-making index costs.131sec  
-one full search costs：5.587sec  
-( excluding compiling time, please use opcache )
+making index costs 283sec  
+one full search costs：3sec  
+( excluding compiling time, full search costs 16sec in branch sapi, PHP7 is much faster )
 
 ##Debug
 If the logformat is wrong, it will write wrong lines in data/error.log.  
