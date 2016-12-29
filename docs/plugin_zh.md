@@ -52,7 +52,7 @@ Logcat 的主体 Map 每份日志文件到一个子进程，子进程再将每�
     "http_user_agent"=> 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.472.25 Safari/534.3'
 ]
 ```
-你可以提取你要的数据，活的跳过这一行。
+你可以提取你要的数据，或者跳过这一行。
 
 ##前端
 Logcat 主体部分依赖 [jQuery](jquery.com)，[echarts](https://github.com/ecomfe/echarts)，[vue](https://github.com/vuejs/vue)，[element](https://github.com/ElemeFE/element)。所以以上文件已被连同 html 头尾预加载。但是你不是必须使用它们。在你的 html 里你想加载什么就加载什么。
