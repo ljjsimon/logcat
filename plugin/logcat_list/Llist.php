@@ -1,13 +1,13 @@
 <?php
 include "IP.class.php";
 class Llist extends Log{
-    protected function filterInput(){
-        $this->ip = $_GET['ip'];
-        isset($_GET['table']) && $this->__set('table', $_GET['table']);
-        isset($_GET['period']) && $this->__set('period',$_GET['period']);
-        isset($_GET['datetimerange']) && $this->__set('datetimerange', $_GET['datetimerange']);
-        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
-            $this->__set('where', array_combine($_GET['where_f'], $_GET['where_v']));
+    protected function filterInput($input){
+        $this->ip = $input['ip'];
+        isset($input['table']) && $this->__set('table', $input['table']);
+        isset($input['period']) && $this->__set('period',$input['period']);
+        isset($input['datetimerange']) && $this->__set('datetimerange', $input['datetimerange']);
+        if(isset($input['where_f']) && isset($input['where_v'])){
+            $this->__set('where', array_combine($input['where_f'], $input['where_v']));
         }
     }
 
@@ -24,13 +24,18 @@ class Llist extends Log{
                 }
             }
         }
-        $time = $fields[$this->config['time']];
+        $time = strtotime($fields[$this->config['time']]);
         $this->dataArr[$time] = $fields;
     }
     
-    protected function got(){
-        krsort($this->dataArr);
-        return array_slice($this->dataArr,200);
+    protected function getReduceData(){
+        return $this->dataArr;
+    }
+    
+    protected function reduceLog($results){
+        $dataArr = call_user_func_array('array_merge',$results);
+        krsort($dataArr);
+        return array_slice($dataArr,200);
     }
 
     public function getHtml(){

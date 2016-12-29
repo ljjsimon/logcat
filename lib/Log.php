@@ -232,6 +232,8 @@ class Log{
         $this->dataArr = $dataArr;
     }
     
+    /* $fields, array combined $config['logFormatAs'] with one line of log
+     */
     protected function getFields($fields){
         $group = $this->group;
         $stime = $this->stime;

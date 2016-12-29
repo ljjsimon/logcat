@@ -1,5 +1,5 @@
 ##overview
-The main part of Logcat Maps each log file to a process, which turns each line into an array. Plugins get what they need, return result. Main part calls reduce function offered by plugin with all results, then returns final data.
+The main part of Logcat Maps each log file to a child process, which turns each line into an array. Plugins in child process get and filter that array, return result to parent process. Main part calls Reduce function offered by plugin with all results, then returns final data.
 
 ##files
 There is a demo in plugin/map. Logcat puts all plugins in plugin/ like that. And this introduction takes the map plugin as example.
@@ -11,8 +11,8 @@ These are functions you should overwrite in your main class:
 - filterInput($input), filter $_GET and $_POST
 - beforeGet(), initialize your result data
 - getFields($fields), you get an array combined one line of log with the name of every part of it
-- getReduceData(), return your result data. Remember it's from one file
-- reduceLog($results), deal with the results array from all files, and return your final result
+- getReduceData(), return your result data. Be aware it's from one file
+- reduceLog($results), deal with the results array from all files, and return your final result. Be aware in this process, the data initialized in beforeGet() is empty
 
 In getFields($fields), when the log is
 ```
