@@ -1,13 +1,13 @@
 <?php
 include "IP.class.php";
 class Map extends Log{
-    protected function filterInput(){
-        $this->ip = $_GET['ip'];
-        isset($_GET['table']) && $this->__set('table', $_GET['table']);
-        isset($_GET['period']) && $this->__set('period',$_GET['period']);
-        isset($_GET['datetimerange']) && $this->__set('datetimerange', $_GET['datetimerange']);
-        if(isset($_GET['where_f']) && isset($_GET['where_v'])){
-            $this->__set('where', array_combine($_GET['where_f'], $_GET['where_v']));
+    protected function filterInput($input){
+        $this->ip = $input['ip'];
+        isset($input['table']) && $this->__set('table', $input['table']);
+        isset($input['period']) && $this->__set('period',$input['period']);
+        isset($input['datetimerange']) && $this->__set('datetimerange', $input['datetimerange']);
+        if(isset($input['where_f']) && isset($input['where_v'])){
+            $this->__set('where', array_combine($input['where_f'], $input['where_v']));
         }
     }
 
@@ -34,9 +34,27 @@ class Map extends Log{
         }
     }
     
-    protected function got(){
+    protected function getReduceData(){
+        return $this->dataArr;
+    }
+    
+    protected function reduceLog($results){
         $res = [];
-        foreach($this->dataArr as $province=>$count){
+        $dataArr = [];
+        foreach($results as $result){
+            if(!$dataArr){
+                $dataArr = $result;
+                continue;
+            }
+            foreach($result as $province => $count){
+                if(isset($dataArr[$province])){
+                    $dataArr[$province] += $count;
+                }else{
+                    $dataArr[$province] = $count;
+                }
+            }
+        }
+        foreach($dataArr as $province=>$count){
             $res[] = [
                 'name' => $province,
                 'value' => $count

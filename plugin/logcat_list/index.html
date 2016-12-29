@@ -1,0 +1,150 @@
+  <div id="container">
+    <div id="form">
+      <el-form :inline="true">
+      <el-row>
+        <el-form-item>
+          <el-tooltip :content="lang.tableDesc" placement="bottom">
+            <el-input :placeholder="lang.table" v-model="inputs.table"></el-input>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+        </el-form-item>
+      </el-row>
+      <el-row>
+          <template class="form-group" v-for="(v,index) in inputs.where_f">
+            <el-form-item>
+              <el-tooltip :content="lang.wherefDesc" placement="bottom">
+                <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item>
+              <el-tooltip :content="lang.wherevDesc" placement="bottom">
+                <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
+              </el-tooltip>
+            </el-form-item>
+            <el-form-item>
+              <el-button v-on:click="delWhere(index)" icon="close"></el-button>
+            </el-form-item>
+          </template>
+      </el-row>
+      <el-row>
+        <el-form-item>
+          <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">{{lang.addWhere}}</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.clearDesc" placement="bottom">
+            <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.submitDesc" placement="bottom">
+            <el-button type="primary" v-on:click="submit">{{lang.submit}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-switch v-bind:disabled="!appending" v-model="autoRequest">
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.example1Desc" placement="bottom">
+            <el-button v-on:click="example1">{{lang.example1}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+        <el-form-item>
+          <el-tooltip :content="lang.example2Desc" placement="bottom">
+            <el-button v-on:click="example2">{{lang.example2}}</el-button>
+          </el-tooltip>
+        </el-form-item>
+      </el-row>
+      </el-form>
+    </div>
+    <el-row>
+      <el-table :data="resList">
+      </el-table>
+    </el-row>
+  </div>
+<script>
+
+new Vue({
+  el:"#container",
+  data:{
+    appending: false,
+    inputs:{
+      table: "",
+      sum: "",
+      count: true,
+      distinct: "",
+      datetimerange: [],
+      period: 1,
+      group: "",
+      where_f: [],
+      where_v: [],
+    },
+    resList: [],
+    pickerOptions: {
+      shortcuts: [{
+        text: '半小时内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Date();
+          start.setTime(start.getTime() - 1800 * 1000);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '一天内',
+        onClick(picker) {
+          const end = new Data();
+          const start = new Data();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一周',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近一个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+          picker.$emit('pick', [start, end]);
+        }
+      }, {
+        text: '最近三个月',
+        onClick(picker) {
+          const end = new Date();
+          const start = new Date();
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+          picker.$emit('pick', [start, end]);
+        }
+      }]
+    },
+    lang: lang
+  },
+  methods: {
+    submit: function(){
+      let self = this
+      $.getJSON({
+        url: '/',
+        data: this.inputs,
+        success: function(data){
+          self.resList = data
+        }
+      })
+    },
+    addWhere: function(){
+      this.inputs.where_f.push('')
+      this.inputs.where_v.push('')
+    },
+    delWhere: function(index){
+      this.inputs.where_f.splice(index,1)
+      this.inputs.where_v.splice(index,1)
+    }
+  }
+})
+</script>
