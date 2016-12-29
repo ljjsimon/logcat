@@ -58,5 +58,4 @@ Logcat 的主体 Map 每份日志文件到一个子进程，子进程再将每�
 Logcat 主体部分依赖 [jQuery](jquery.com)，[echarts](https://github.com/ecomfe/echarts)，[vue](https://github.com/vuejs/vue)，[element](https://github.com/ElemeFE/element)。所以以上文件已被连同 html 头尾预加载。但是你不是必须使用它们。在你的 html 里你想加载什么就加载什么。
 
 ##配置
-把插件的信息加到 config.json 里的 plugin 部分
-add the information of your plugin to the configuration in config.json
+把插件的信息加到 config.json 里的 plugin 部分。
