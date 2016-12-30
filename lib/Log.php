@@ -285,7 +285,7 @@ class Log{
             ];
         }
         
-        $res = $serv->taskWaitMulti($tasks);
+        $res = $serv->taskWaitMulti($tasks,300);
 
         return $this->reduceLog($res);
     }

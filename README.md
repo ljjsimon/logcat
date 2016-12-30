@@ -33,7 +33,7 @@ PHP version：5.5
 CPU：2.7GHz I5  
 log files：22 files, 2.56G totally  
 making index costs 283sec  
-one full search costs：3sec  
+one full search costs：10sec  
 ( excluding compiling time, full search costs 16sec in single process, PHP7 is faster )
 
 ##Debug

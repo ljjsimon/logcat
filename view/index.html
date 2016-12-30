@@ -1,95 +1,75 @@
   <div class="container">
-    <div id="form">
-      <el-form :inline="true">
-      <el-row>
-        <el-form-item>
+    <div id="form" style="width:915px">
+      <el-form label-width="85px" label-position="left">
+        <el-form-item label="SELECT">
+          <el-col :span="2">
           <el-tooltip :content="lang.countDesc" placement="bottom">
             <el-checkbox type="checkbox" v-bind:disabled="inputs.sum != ''" v-model="inputs.count">{{this.lang.count}}</el-checkbox>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
+          </el-col>
           <el-tooltip :content="lang.distinctDesc" placement="bottom">
             <el-input :placeholder="lang.distinct" v-bind:disabled="inputs.sum != ''" v-model="inputs.distinct"></el-input>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.sumDesc" placement="bottom-start">
             <el-input :placeholder="lang.sum" v-bind:disabled="inputs.count" v-model="inputs.sum"></el-input>
           </el-tooltip>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="FROM">
           <el-tooltip :content="lang.tableDesc" placement="bottom">
             <el-input :placeholder="lang.table" v-model="inputs.table"></el-input>
           </el-tooltip>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="WHERE">
           <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
         </el-form-item>
-      </el-row>
-      <el-row>
-        <el-form-item>
+        <template class="form-group" v-for="(v,index) in inputs.where_f">
+        <el-form-item label="AND">
+          <el-col span="6">
+          <el-tooltip :content="lang.wherefDesc" placement="bottom">
+            <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
+          </el-tooltip>
+          </el-col>
+          <el-col span="6">
+          <el-tooltip :content="lang.wherevDesc" placement="bottom">
+            <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
+          </el-tooltip>
+          </el-col>
+          <el-col span="3">
+          <el-button v-on:click="delWhere(index)" icon="close"></el-button>
+          </el-col>
+        </el-form-item>
+        </template>
+        <el-form-item label="GROUP BY">
           <el-tooltip :content="lang.periodDesc" placement="bottom">
             <el-input v-bind:readonly="appending" v-bind:disabled="inputs.group!=''" :placeholder="lang.period" v-model="inputs.period"></el-input>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.groupDesc" placement="bottom">
             <el-input v-bind:readonly="appending" v-bind:disabled="inputs.period!=''" :placeholder="lang.group" v-model="inputs.group"></el-input>
           </el-tooltip>
         </el-form-item>
-      </el-row>
-      <el-row>
-          <template class="form-group" v-for="(v,index) in inputs.where_f">
-            <el-form-item>
-              <el-tooltip :content="lang.wherefDesc" placement="bottom">
-                <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item>
-              <el-tooltip :content="lang.wherevDesc" placement="bottom">
-                <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item>
-              <el-button v-on:click="delWhere(index)" icon="close"></el-button>
-            </el-form-item>
-          </template>
-      </el-row>
-      <el-row>
         <el-form-item>
           <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">{{lang.addWhere}}</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-tooltip :content="lang.clearDesc" placement="bottom">
-            <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
-          </el-tooltip>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.submitDesc" placement="bottom">
             <el-button type="primary" v-on:click="submit">{{lang.submit}}</el-button>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
-          <el-switch v-bind:disabled="!appending" v-model="autoRequest">
-        </el-form-item>
-        <el-form-item>
+          <el-tooltip :content="lang.clearDesc" placement="bottom">
+            <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
+          </el-tooltip>
           <el-tooltip :content="lang.example1Desc" placement="bottom">
             <el-button v-on:click="example1">{{lang.example1}}</el-button>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.example2Desc" placement="bottom">
             <el-button v-on:click="example2">{{lang.example2}}</el-button>
           </el-tooltip>
+          <el-switch v-show="false" v-bind:disabled="!appending" v-model="autoRequest">
         </el-form-item>
-      </el-row>
       </el-form>
     </div>
     <div class="row">
       <div id="chart" style="width: 1080px;height:400px;"></div>
     </div>
   </div>
-<script src="view/js/lang/lang-en.js"></script>
+<script src="view/js/lang/lang-zh_CN.js"></script>
 <script>
 var chart = echarts.init(document.getElementById('chart'))
 

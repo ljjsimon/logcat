@@ -1,6 +1,6 @@
 <?php
 require 'lib/config.php'; //$sysConfig
-$config = json_decode(file_get_contents('config.json'),true);
+$config = json_decode(file_get_contents('config1.json'),true);
 $config = array_merge($sysConfig, $config);
 $config['rootPath'] = __DIR__;
 date_default_timezone_set($config['timezone']);
@@ -12,12 +12,14 @@ $cache = new Cache;
 $mainIndex = [];
 $index = [];
 $index = new Index($config,$cache);
+echo 'making index...';
 $index->makeIndex();
+echo "done\n";
 
 $serv = new swoole_http_server("0.0.0.0", 8080);
 $serv->set([
-    'worker_num' => 1,
-    'task_worker_num' => 1
+    'worker_num' => 4,
+    'task_worker_num' => 4
 ]);
 
 $serv->on('Request', function(swoole_http_request $request, swoole_http_response $response) use($serv, $config, $cache, $index){
@@ -29,8 +31,7 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
             '.js' => 'application/x-javascript',
             '.svg' => 'text/xml',
             '.ico' => 'image/x-icon',
-            '.woff' => 'application/font-woff',
-            
+            '.woff' => 'application/octet-stream'
         ];
         if(isset($contentType[$ext])){
             $response->header("Content-Type", $contentType[$ext]);
