@@ -1,9 +1,15 @@
 <?php
 require 'lib/config.php'; //$sysConfig
-$config = json_decode(file_get_contents('config1.json'),true);
+$config = json_decode(file_get_contents('config.json'),true);
 $config = array_merge($sysConfig, $config);
 $config['rootPath'] = __DIR__;
 date_default_timezone_set($config['timezone']);
+
+spl_autoload_register(function ($class){
+    global $config;
+    $class = strtolower($class);
+    include 'plugin/'.$config['plugin'][$class]['file'];
+});
 
 require 'lib/Log.php';
 require 'lib/Index.php';
@@ -36,6 +42,7 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
         if(isset($contentType[$ext])){
             $response->header("Content-Type", $contentType[$ext]);
         }
+        $response->header('Cache-Control','max-age:8640000');
         $response->sendfile($config['rootPath'].$request->server["request_uri"]);
         return;
     }
@@ -43,7 +50,8 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
     //write log from collectors
     if(isset($request->post['collector_id']) && isset($request->post['log']) && isset($config['collector_log_file'][$request->post['collector_id']])) {
         $serv->task($request->post, -1, function (swoole_server $serv, $task_id, $data) use ($index, $config){
-            $index->collectLog($data['collector_id'], $data['log']);
+            $file = $config['rootPath'].'/'.$config['dataDir'].'/'.$config['collector_log_file'][$data['collector_id']].'_'.data('Ymd');
+            $index->collectLog($file, $data['log']);
         });
         return;
     }
@@ -51,11 +59,17 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
     $_GET = isset($request->get) ? $request->get : [];
     $_POST = isset($request->post) ? $request->post : [];
 
-    //echo pages
+    //plugin
     $p = isset($_GET['p']) ? $_GET['p'] : '';
     unset($_GET['p']);
-    $log = new Log($config,$cache);
+    if($p && isset($config['plugin'][$p])){
+        $class = ucfirst($p);
+        $log = new $class($config,$cache);
+    }else{
+        $log = new Log($config,$cache);
+    }
 
+    //echo pages
     if(isset($_GET['getConfig'])){
         $config['p'] = $p;
         $response->end(json_encode($config));

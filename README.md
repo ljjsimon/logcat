@@ -1,6 +1,6 @@
 #Logcat
-Simple yet powerful log analyser, based on PHP
-
+Simple yet powerful log analyser, based on PHP  
+[demo picture](https://github.com/questionlin/logcat/blob/master/docs/demo.png)  
 [中文版](https://github.com/questionlin/logcat/blob/master/docs/README_zh.md)
 
 ##Overview

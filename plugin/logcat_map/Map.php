@@ -38,7 +38,7 @@ class Map extends Log{
         return $this->dataArr;
     }
     
-    protected function reduceLog($results){
+    protected function reduceLog(array $results){
         $res = [];
         $dataArr = [];
         foreach($results as $result){

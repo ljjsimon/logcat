@@ -16,7 +16,7 @@
     <div id="sideMenu">
     <el-col span="4">
       <el-menu :default-active="config.p" v-on:select="select">
-        <el-menu-item index="">Home</el-menu-item>
+        <el-menu-item index="">SQL</el-menu-item>
         <el-menu-item v-for="(item,name) in config.plugin" :index="name">{{item.title}}</el-menu-item>
       </el-menu>
     </el-col>

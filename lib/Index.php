@@ -180,13 +180,12 @@ class Index{
         file_put_contents($file,$log,FILE_APPEND);
     }
 
-    public function collectLog($collector_id, $log){
+    public function collectLog($file, $log){
         $config = $this->config;
         if($log == ''){
             return;
         }
 
-        $file = $config['rootPath'].'/'.$config['dataDir'].'/'.$config['collector_log_file'][$collector_id];
         file_put_contents($file,$log,FILE_APPEND);
         clearstatcache();
         $mainIndex = $this->cache->get('mainIndex');

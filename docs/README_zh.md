@@ -1,5 +1,6 @@
 #Logcat
-简单好用的日志分析套件，基于PHP
+简单好用的日志分析套件，基于PHP  
+[例子截图](https://github.com/questionlin/logcat/blob/master/docs/demo.png)
 
 ##简介
 Logcat 是一个日志分析套件。但是不限于日志文件，Logcat 可以分析所有有特定结构的文本文件。  

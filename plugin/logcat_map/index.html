@@ -1,63 +1,50 @@
   <div class="container">
-    <div id="form">
-      <el-form :inline="true">
-      <el-row>
-        <el-form-item>
+    <div id="form" style="width:915px">
+      <el-form label-width="85px" label-position="left">
+        <el-form-item label="SELECT">
           <el-tooltip content="ip 对应字段" placement="bottom">
-            <el-input placeholder="ip" v-model="inputs.ip"></el-input>
+            <el-input placeholder="ip 字段" v-model="inputs.ip"></el-input>
           </el-tooltip>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="FROM">
           <el-tooltip :content="lang.tableDesc" placement="bottom">
             <el-input :placeholder="lang.table" v-model="inputs.table"></el-input>
           </el-tooltip>
         </el-form-item>
-        <el-form-item>
-          <el-date-picker v-bind:readonly="appending" type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
+        <el-form-item label="WHERE">
+          <el-date-picker type="datetimerange" :picker-options="pickerOptions" :placeholder="lang.datetimerange" style="width:350px" v-model="inputs.datetimerange"></el-date-picker>
         </el-form-item>
-      </el-row>
-      <el-row>
-        <el-form-item>
+        <template class="form-group" v-for="(v,index) in inputs.where_f">
+        <el-form-item label="AND">
+          <el-col span="6">
+            <el-tooltip :content="lang.wherefDesc" placement="bottom">
+              <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
+            </el-tooltip>
+          </el-col>
+          <el-col span="6">
+            <el-tooltip :content="lang.wherevDesc" placement="bottom">
+              <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
+            </el-tooltip>
+          </el-col>
+          <el-col span="3">
+            <el-button v-on:click="delWhere(index)" icon="close"></el-button>
+          </el-col>
+        </el-form-item>
+        </template>
+        <el-form-item label="GROUP BY">
           <el-tooltip :content="lang.periodDesc" placement="bottom">
-            <el-input v-bind:readonly="appending" :placeholder="lang.period" v-model="inputs.period"></el-input>
+            <el-input :placeholder="lang.period" v-model="inputs.period"></el-input>
           </el-tooltip>
         </el-form-item>
-      </el-row>
-      <el-row>
-          <template class="form-group" v-for="(v,index) in inputs.where_f">
-            <el-form-item>
-              <el-tooltip :content="lang.wherefDesc" placement="bottom">
-                <el-input :placeholder="lang.wheref" v-model="inputs.where_f[index]"></el-input>
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item>
-              <el-tooltip :content="lang.wherevDesc" placement="bottom">
-                <el-input :placeholder="lang.wherev" v-model="inputs.where_v[index]"></el-input>
-              </el-tooltip>
-            </el-form-item>
-            <el-form-item>
-              <el-button v-on:click="delWhere(index)" icon="close"></el-button>
-            </el-form-item>
-          </template>
-      </el-row>
-      <el-row>
         <el-form-item>
           <el-button :plain="true" type="info" v-on:click="addWhere" icon="plus">{{lang.addWhere}}</el-button>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.clearDesc" placement="bottom">
             <el-button :plain="true" type="warning" v-on:click="clear">{{lang.clear}}</el-button>
           </el-tooltip>
-        </el-form-item>
-        <el-form-item>
           <el-tooltip :content="lang.submitDesc" placement="bottom">
             <el-button type="primary" v-on:click="submit">{{lang.submit}}</el-button>
           </el-tooltip>
         </el-form-item>
-        <el-form-item>
-          <el-switch v-bind:disabled="!appending" v-model="autoRequest">
-        </el-form-item>
-      </el-row>
       </el-form>
     </div>
     <div class="row">
@@ -72,7 +59,6 @@ var chart = echarts.init(document.getElementById('chart'))
 new Vue({
   el:"#form",
   data:{
-    appending: false,
     inputs:{
       table: "",
       ip: "",
@@ -175,7 +161,6 @@ new Vue({
   },
   methods: {
     submit: function(){
-      this.appending = true
       this.inputsLog.push(JSON.parse(JSON.stringify(this.inputs)))
       chart.showLoading()
       let self = this
@@ -227,7 +212,6 @@ new Vue({
         where_v: [],
         p: 'map'
       }
-      this.appending = false
       this.inputsLog = []
       this.autoRequest = false
       this.autoRequestId = 0

@@ -30,8 +30,12 @@
   },
   "plugin": {
     "map": {
-      "file": "plugin/logcat_map/map.php",
+      "file": "logcat_map/map.php",
       "title": "地图"
+    },
+    "llist": {
+      "file": "logcat_list/Llist.php",
+      "title": "列表"
     }
   }
 }

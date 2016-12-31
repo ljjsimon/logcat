@@ -4,7 +4,7 @@ class Log{
     protected $sum,$count,$distinct,$table,$where,$whereSign,$group;
     protected $stime,$etime,$period;
     
-    public function __construct($config, $cache){
+    public function __construct(array $config, $cache){
         $this->config = $config;
         $this->cache = $cache;
         $this->mainIndex = $cache->get('mainIndex');
