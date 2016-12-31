@@ -32,6 +32,24 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
     //static files
     $ext = strtolower(strrchr($request->server["request_uri"],'.'));
     if( $ext && $ext != '.php'){
+        if($request->server["request_uri"] == '/favicon.ico'){
+            $response->status(404);
+            $response->end();
+            return;
+        }
+
+        $file = __DIR__ .$request->server["request_uri"];
+        $last_modified = filemtime($file);;
+        $etag = md5_file($file);
+        $response->header("Last-Modified", gmdate("D, d M Y H:i:s", $last_modified) . " GMT");
+        $response->header("Etag", $etag);
+        if( (isset($request->header['if-modified-since']) && strtotime($request->header['if-modified-since']) == $last_modified)
+         || (isset($request->header['if-none-match']) && trim($request->header['if-none-match']) == $etag) ){
+            $response->status(304);
+            $response->end();
+            return;
+        }
+
         $contentType = [
             '.css' => 'text/css',
             '.js' => 'application/x-javascript',
@@ -42,8 +60,7 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
         if(isset($contentType[$ext])){
             $response->header("Content-Type", $contentType[$ext]);
         }
-        $response->header('Cache-Control','max-age:8640000');
-        $response->sendfile($config['rootPath'].$request->server["request_uri"]);
+        $response->sendfile($file);
         return;
     }
     
@@ -78,6 +95,7 @@ $serv->on('Request', function(swoole_http_request $request, swoole_http_response
         $header = file_get_contents('view/header.html');
         $footer = file_get_contents('view/footer.html');
         $response->header("Content-Type", 'text/html');
+        $response->gzip();
         $response->end($header.$log->getHtml().$footer);
         return;
     }
