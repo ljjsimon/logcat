@@ -7,6 +7,8 @@ Logcat 是一个日志分析套件。但是不限于日志文件，Logcat 可以
 Logcat 通过给文件建立索引，使使用者能像使用 SQL 一样搜索日志。  
 这个版本使用了 swoole 来加速搜索，但是也因此使用了更多的内存和 CPU。如果你对此比较在意，请使用 sapi 分支（ sapi 分支已经停止开发，因为和主版本的插件系统不兼容 ）
 
+![预览图片](http://https://github.com/questionlin/logcat/tree/master/docs/overview.png)
+
 ##依赖
 [swoole](https://github.com/swoole/swoole-src)（ 在 windows 下需要 cygwin 或 BashOnWindows )
 
