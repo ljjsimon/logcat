@@ -8,7 +8,7 @@ Logcat is a log analyzation platform. It's not only for log files, but also for 
 Logcat makes index for all files, and enables you search logs in a way like using SQL( count(),sum()... from... where ).  
 This version uses swoole to speed up by costing more momery and CPU. If you mind it, checkout branch sapi.( Branch sapi is stoped because the plugin system is different ).
 
-![overview](https://github.com/questionlin/logcat/tree/master/docs/overview.png)
+![overview](https://github.com/questionlin/logcat/raw/master/docs/overview.png)
 
 ##Requirement
 [swoole](https://github.com/swoole/swoole-src)( Needs cygwin or BashOnWindows in windows )
